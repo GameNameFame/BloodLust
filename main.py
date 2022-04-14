@@ -11,7 +11,7 @@ sw, sh = pygame.display.Info().current_w, pygame.display.Info().current_h
 screen = pygame.display.set_mode((sw, sh), FULLSCREEN)
 displaysurf = pygame.Surface((800, 600))
 
-bgpic = pygame.image.load("bg.png")
+#bgpic = pygame.image.load("bg.png")
 
 def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='freesansbold'):
     fontttf += '.ttf'
@@ -30,8 +30,25 @@ class Player(Character):
     def __init__(self):
         super().__init__()
         self.rect.x = 268
+        self.spritesheet = pygame.image.load("stickman spritesheet.png")
+        self.animationvar = 0
+        self.spritetype = "stand"
+        self.direction = "right"
     def display(self, scrollx):
-        pygame.draw.rect(displaysurf, (0, 0, 0), (self.rect.x - scrollx, self.rect.y, self.rect.w, self.rect.h))
+        if self.direction == "right":
+            if self.spritetype == "stand":
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (3*64, 0, self.rect.w, self.rect.h))
+            elif self.spritetype == "walk":
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 0, self.rect.w, self.rect.h))
+            elif self.spritetype == "run":
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 128, self.rect.w, self.rect.h))
+        else:
+            if self.spritetype == "stand":
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (4*64, 0, self.rect.w, self.rect.h))
+            elif self.spritetype == "walk":
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 0, self.rect.w, self.rect.h))
+            elif self.spritetype == "run":
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
 
 class Enemy(Character):
     def __init__(self):
@@ -44,6 +61,7 @@ class Enemy(Character):
 
 player = Player()
 enemylist = [Enemy()]
+enemylist = []
 
 def mainloop(fresh=True):
     running = True
@@ -65,6 +83,9 @@ def mainloop(fresh=True):
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         j += 5
     while running:
+        player.animationvar += 0.4
+        if player.animationvar > 8:
+            player.animationvar = 0
         pygame.display.flip(); clock.tick(30)
         scrollx += (player.rect.x - scrollx - 268)/20
         if player.rect.bottom < 440:
@@ -88,18 +109,23 @@ def mainloop(fresh=True):
                     print(player.rect.x)
         keys_pressed = pygame.key.get_pressed()
         if keys_pressed[K_a]:
+            player.spritetype = "walk"
+            player.direction = "left"
             if player.rect.x > 268:
                 if player.xacc > -10:
                     player.xacc -= 1
             else:
                 player.xacc = 0
         elif keys_pressed[K_d]:
+            player.spritetype = "walk"
+            player.direction = "right"
             if player.rect.x < 3368:
                 if player.xacc < 10:
                     player.xacc += 1
             else:
                 player.xacc = 0
         else:
+            player.spritetype = "stand"
             if player.xacc < 0:
                 player.xacc += 1
             elif player.xacc > 0:
@@ -114,11 +140,12 @@ def mainloop(fresh=True):
             enemy.rect.x += enemy.xacc
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
-        else:
+        elif player.spritetype == "walk":
+            player.spritetype = "run"
             player.rect.x += player.xacc
         player.rect.y += player.grav
         displaysurf.fill((255, 60, 0))
-        displaysurf.blit(bgpic, (-scrollx, 0))
+        #displaysurf.blit(bgpic, (-scrollx, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         player.display(scrollx)
         for enemy in enemylist:
@@ -164,3 +191,4 @@ def menuloop():
 
 if __name__ == "__main__":
     menuloop()
+    
