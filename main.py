@@ -25,6 +25,7 @@ bgpic = pygame.image.load("bg.png")
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
+level = 0
 
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -182,31 +183,17 @@ player = Player()
 enemylist = [Enemy()]
 enemylist = []
 
-def mainloop(fresh=True):
-    running = True
-    firsthit = False
-    instruct = 0
-    spoke = False
-    pressed = [False, False, False, False]
-    if fresh:
-        pass
-    scrollx = 0
+def level0():
     speech(0)
     speech(1)
     speech(2)
-    j = 0
-    while j < 225:
-        pygame.display.flip(); clock.tick(30)
-        for ev in pygame.event.get():
-            if ev.type == QUIT:
-                pygame.quit()
-                sys.exit()
-        fadebg = pygame.Surface((800, 600))
-        fadebg.fill((0, 0, 0))
-        fadebg.set_alpha(j)
-        displaysurf.blit(fadebg, (0, 0))
-        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
-        j += 5
+    running = True
+    firsthit = False
+    instruct = 0
+    countdown = -1
+    spoke = False
+    pressed = [False, False, False, False]
+    scrollx = 0
     while running:
         keys_pressed = pygame.key.get_pressed()
         player.animationvar += 0.4
@@ -253,6 +240,8 @@ def mainloop(fresh=True):
                     instruct = 4
 
         pygame.display.flip(); clock.tick(30)
+        if countdown > 0:
+            countdown -= 1
         if player.rect.centerx < 585:
             scrollx += (player.rect.x - scrollx - 268)/20
         else:
@@ -272,12 +261,108 @@ def mainloop(fresh=True):
                     # pause the game
                     running = False
                 if ev.key == K_SPACE:
-                    if not firsthit:
+                    if not firsthit and instruct == 3:
+                        firsthit = True
                         speech(3)
                         speech(4)
-                        speech(5)
-                        speech(6)
-                    player.attack = True
+                        countdown = 1000
+                    if instruct > 2:
+                        player.attack = True 
+                        player.animationvar = 0
+                        player.attackno = 2*128
+                if ev.key == K_w:
+                    if player.rect.bottom == 440:
+                        player.grav = -18
+                if ev.key == K_x:
+                    print(player.rect.x)
+                if ev.key == K_z:
+                    print(scrollx)
+        if keys_pressed[K_a]:
+            player.spritetype = "walk"
+            player.direction = "left"
+            if player.rect.x > 268:
+                if player.xacc > -10:
+                    player.xacc -= 1
+            else:
+                player.xacc = 0
+        elif keys_pressed[K_d]:
+            player.spritetype = "walk"
+            player.direction = "right"
+            if player.rect.x < 948:
+                if player.xacc < 10:
+                    player.xacc += 1
+            else:
+                player.xacc = 0
+        else:
+            player.spritetype = "stand"
+            if player.xacc < 0:
+                player.xacc += 1
+            elif player.xacc > 0:
+                player.xacc -= 1
+        for enemy in enemylist:
+            if player.rect.right < enemy.rect.left:
+                if enemy.xacc > -enemy.speed:
+                    enemy.xacc -= 1
+            elif player.rect.left > enemy.rect.right:
+                if enemy.xacc < enemy.speed:
+                    enemy.xacc += 1
+            enemy.rect.x += enemy.xacc
+        if not keys_pressed[K_LSHIFT]:
+            player.rect.x += player.xacc/2
+        elif player.spritetype == "walk":
+            player.spritetype = "run"
+            player.rect.x += player.xacc
+        if player.attack:
+            if player.attackno == 2*128 and player.animationvar > 7.5:
+                player.grav = -12
+        player.rect.y += player.grav
+        displaysurf.fill((255, 60, 0))
+        displaysurf.blit(pygame.transform.scale(bgpic, (sw, 500)), (-scrollx, 0))
+        pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
+        pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
+        player.display(scrollx)
+        for enemy in enemylist:
+            enemy.display(scrollx)
+        if instruct < 2:
+            displaysurf.blit(wadpic, (100, 100))
+        if countdown == 0:
+            speech(5)
+            speech(6)
+            running = False
+            level = 1
+        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+
+def level1():
+    running = True
+    scrollx = 0
+    while running:
+        keys_pressed = pygame.key.get_pressed()
+        player.animationvar += 0.4
+        if player.animationvar > 8:
+            player.animationvar = 0
+        pygame.display.flip(); clock.tick(30)
+        if countdown > 0:
+            countdown -= 1
+        if player.rect.centerx < 585:
+            scrollx += (player.rect.x - scrollx - 268)/20
+        else:
+            scrollx += (player.rect.x - scrollx - 474)/20
+        if player.rect.bottom < 440:
+            player.grav += 1
+        else:
+            player.grav = 0
+            player.rect.bottom = 440
+        for ev in pygame.event.get():
+            if ev.type == QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if ev.type == KEYDOWN:
+                if ev.key == K_ESCAPE:
+                    # pause the game
+                    running = False
+                if ev.key == K_SPACE:
+                    player.attack = True 
                     player.animationvar = 0
                     player.attackno = 2*128
                 if ev.key == K_w:
@@ -329,13 +414,26 @@ def mainloop(fresh=True):
         displaysurf.fill((255, 60, 0))
         displaysurf.blit(pygame.transform.scale(bgpic, (sw, 500)), (-scrollx, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
-        pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, player.rect.bottom + 60), (player.rect.right - 20 - scrollx, player.rect.bottom + 60), (player.rect.centerx - scrollx, player.rect.bottom + 40)))
+        pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
         for enemy in enemylist:
             enemy.display(scrollx)
-        if instruct < 2:
-            displaysurf.blit(wadpic, (100, 100))
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+
+def screen_fade():
+    j = 0
+    while j < 225:
+        pygame.display.flip(); clock.tick(30)
+        for ev in pygame.event.get():
+            if ev.type == QUIT:
+                pygame.quit()
+                sys.exit()
+        fadebg = pygame.Surface((800, 600))
+        fadebg.fill((0, 0, 0))
+        fadebg.set_alpha(j)
+        displaysurf.blit(fadebg, (0, 0))
+        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+        j += 5
 
 def menuloop():
     running = True
@@ -357,7 +455,12 @@ def menuloop():
                 optcolors[i] = (200, 200, 0)
                 if mouse[1][0]:
                     if i == 0:
-                        mainloop()
+                        if level == 0:
+                            screen_fade()
+                            level0()
+                        if level == 1:
+                            screen_fade()
+                            level1()
                     elif i == 1:
                         #settings
                         pass
