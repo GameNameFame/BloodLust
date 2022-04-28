@@ -191,12 +191,6 @@ class Enemy(Character):
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
                 if self.attackno == 3*128:
                     displaysurf.blit(self.spritesheet, (self.rect.x - scrollx + (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), (int(self.animationvar)*64, self.attackno + 128, self.rect.w, self.rect.h))
-                    if len(self.swordparticles) < 10:
-                        self.swordparticles.append(Particle(self.rect.x + self.animationvar*10, self.rect.y - (3.5 - self.animationvar)*4, -1, 0))
-                    for parts in self.swordparticles:
-                        parts.display(scrollx)
-                        if parts.size < 0:
-                            self.swordparticles.remove(parts)
                 if self.animationvar > 7.5 and self.attackno == 2*128:
                     self.attackno = 3*128
                     self.animationvar = 0
@@ -469,21 +463,27 @@ def level1():
                 if enemy.xacc > -enemy.speed:
                     enemy.xacc -= 1
                 enemy.direction = "left"
-                if enemy.rect.x - player.rect.right > 100:
+                if enemy.rect.x - player.rect.right < 80:
                     enemy.spritetype = "run"
                     enemy.rect.x -= enemy.speed
+                else:
+                    enemy.spritetype = "walk"
             elif player.rect.left > enemy.rect.right:
                 if enemy.xacc < enemy.speed:
                     enemy.xacc += 1
                 enemy.direction = "right"
-                if player.rect.x - enemy.rect.right > 100:
+                if player.rect.x - enemy.rect.right < 80:
                     enemy.spritetype = "run"
                     enemy.rect.x += enemy.speed
+                else:
+                    enemy.spritetype = "walk"
             if enemy.rect.colliderect(player.rect):
+                if not enemy.attack:
+                    enemy.animationvar = 0
+                    enemy.attackno = 3*128
                 enemy.attack = True
-                enemy.animationvar = 0
-                enemy.attackno = 2*128
-            enemy.rect.x += enemy.xacc
+            else:
+                enemy.rect.x += enemy.xacc
 
         # display
         displaysurf.fill((255, 60, 0))
