@@ -229,7 +229,6 @@ class Enemy(Character):
 player = Player()
 enemylist = []
 
-
 def level0():
     speech(0)
     speech(1)
