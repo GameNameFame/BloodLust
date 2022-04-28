@@ -1,0 +1,77 @@
+Hello, and welcome back to my channel, people!
+
+I've finally decided on a concrete name for this channel, which is the same as my
+instagram handle - Uncanny Pronk.
+
+Now, if you have followed my channel for a long time (which is very unlikely, but
+if you did, you're amazing.), you would already know that I have changed this channel's
+name a lot in the past, but I guess this one is here to stay.
+
+Now, let's get started with this video.
+
+I've been working on this stickman fighting game called "Bloodlust" for quite some
+time now... (over-the-top name, I know.) and instead of posting devlogs from the
+beginning, here I am posting the first devlog after coding the main part of the game.
+
+But, it doesn't really matter, cause the stuff I have done till now is probably really
+boring and dull to you guys, so lemme just explain what I have got going here.
+
+---------------------------------------------------------------------------------------------
+
+So, the programming language I'm using to develop this game is called "Python" and
+trust me, it's really easy to learn.
+The GUI or graphical user interface that I'm using for this magical part is called
+pygame and honestly, it's pretty amazing.
+
+then there is this module called "py tts x3", which I'll keep as a secret for now,
+and show you what it does, rather than talk about it.
+
+Anyway, without further adieu, Let's run this bad boy.
+
+*run game*
+
+First, we are greeted with a rather simple looking Main menu, which I'll beautify later on.
+
+Start and Exit are the only functional buttons, cause I haven't really come to the point of
+making a settings tab yet.
+ *click on start*
+
+Remember I was telling you about the mystery mouseketool called pyttsx3? See the magic.
+
+*after "feel free to move around"*
+
+pyttsx3 is a text-to-speech python module that instantaneously narrates the text instead
+of saving it locally as an mp3 file. This has a lot of benefits which you'll see in the
+upcoming devlogs.
+
+First, when you start the game, it gives you a tutorial on how to go about playing this game.
+
+*go along with the tutorial*
+
+*after the sword swing tutorial*
+Now I've added a timer that counts down a thousand iterations... which I'm guessing is
+around a 100 seconds, or maybe 50. Ah, I'm bad at math, so stop judging me, not that I care
+though.
+
+Anyway, the art and animation of the stickman and the sword were drawn using a free pixel art
+software called "Piskel" which is really light and easy to use.
+
+*show piskel window*
+
+Then here is level 1. For this, I've added a purple enemy, who comes walking to the player
+from a distance, and when he comes near the player and notices them, he starts sprinting
+towards the player, and starts swinging his sword, and he also follows you wherever you go.
+Since the enemy is a bit faster than the player, he cannot be outran, so you have to face him
+head on.
+
+I have not added a hp bar or any other UI element yet, so I guess that will be added in the next devlog.
+
+With this, let's wrap up this video, where I have just explained what I have done till now.
+
+Hope you guys liked this video, and if you did, make sure to click the thumbs up button below.
+
+And if you wish to see more of such content, or want to see how badass this game ends up,
+consider subscribing. It's free of cost, and a really nice gesture.
+
+Hope y'all have a amazing day, and help other have a good day too.
+Peace!
