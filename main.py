@@ -23,7 +23,6 @@ screen = pygame.display.set_mode((sw, sh), FULLSCREEN)
 displaysurf = pygame.Surface((800, 600))
 displayrect = Rect(0, 0, 800, 600)
 
-bgpic = pygame.image.load("bg.png")
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
@@ -392,7 +391,6 @@ def level0():
 
         # display
         displaysurf.fill((255, 60, 0))
-        displaysurf.blit(pygame.transform.scale(bgpic, (sw, 500)), (-scrollx, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
@@ -418,10 +416,10 @@ def level1():
         player.animationvar += 0.4
         if player.animationvar > 8:
             player.animationvar = 0
-        # for enemy in enemylist:
-        #     enemy.animationvar += 0.4
-        #     if enemy.animationvar > 8:
-        #         enemy.animationvar = 0
+        for enemy in enemylist:
+            enemy.animationvar += 0.4
+            if enemy.animationvar > 8:
+                enemy.animationvar = 0
         pygame.display.flip(); clock.tick(30)
         if countdown > 0:
             countdown -= 1
@@ -494,7 +492,6 @@ def level1():
                 player.grav = -12
         player.rect.y += player.grav
         displaysurf.fill((255, 60, 0))
-        displaysurf.blit(pygame.transform.scale(bgpic, (sw, 500)), (-scrollx, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
