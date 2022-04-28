@@ -367,28 +367,6 @@ def level0():
                 player.grav = -12
         player.rect.y += player.grav
 
-        # enemy
-        for enemy in enemylist:
-            if player.rect.right < enemy.rect.left:
-                if enemy.xacc > -enemy.speed:
-                    enemy.xacc -= 1
-                enemy.direction = "left"
-                if enemy.rect.x - player.rect.right > 100:
-                    enemy.spritetype = "run"
-                    enemy.rect.x -= enemy.speed
-            elif player.rect.left > enemy.rect.right:
-                if enemy.xacc < enemy.speed:
-                    enemy.xacc += 1
-                enemy.direction = "right"
-                if player.rect.x - enemy.rect.right > 100:
-                    enemy.spritetype = "run"
-                    enemy.rect.x += enemy.speed
-            if enemy.rect.colliderect(player.rect):
-                enemy.attack = True
-                enemy.animationvar = 0
-                enemy.attackno = 2*128
-            enemy.rect.x += enemy.xacc
-
         # display
         displaysurf.fill((255, 60, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
@@ -474,14 +452,7 @@ def level1():
                 player.xacc += 1
             elif player.xacc > 0:
                 player.xacc -= 1
-        for enemy in enemylist:
-            if player.rect.right < enemy.rect.left:
-                if enemy.xacc > -enemy.speed:
-                    enemy.xacc -= 1
-            elif player.rect.left > enemy.rect.right:
-                if enemy.xacc < enemy.speed:
-                    enemy.xacc += 1
-            enemy.rect.x += enemy.xacc
+
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
         elif player.spritetype == "walk":
@@ -491,6 +462,30 @@ def level1():
             if player.attackno == 2*128 and player.animationvar > 7.5:
                 player.grav = -12
         player.rect.y += player.grav
+
+        # enemy
+        for enemy in enemylist:
+            if player.rect.right < enemy.rect.left:
+                if enemy.xacc > -enemy.speed:
+                    enemy.xacc -= 1
+                enemy.direction = "left"
+                if enemy.rect.x - player.rect.right > 100:
+                    enemy.spritetype = "run"
+                    enemy.rect.x -= enemy.speed
+            elif player.rect.left > enemy.rect.right:
+                if enemy.xacc < enemy.speed:
+                    enemy.xacc += 1
+                enemy.direction = "right"
+                if player.rect.x - enemy.rect.right > 100:
+                    enemy.spritetype = "run"
+                    enemy.rect.x += enemy.speed
+            if enemy.rect.colliderect(player.rect):
+                enemy.attack = True
+                enemy.animationvar = 0
+                enemy.attackno = 2*128
+            enemy.rect.x += enemy.xacc
+
+        # display
         displaysurf.fill((255, 60, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
