@@ -395,10 +395,11 @@ def level1():
         pygame.display.flip(); clock.tick(30)
         if countdown > 0:
             countdown -= 1
-        if player.rect.centerx < 585:
-            scrollx += (player.rect.x - scrollx - 268)/20
-        else:
-            scrollx += (player.rect.x - scrollx - 474)/20
+        scrollx += (player.rect.x - scrollx - 268)/20
+        # if player.rect.centerx < 585:
+        #     scrollx += (player.rect.x - scrollx - 268)/20
+        # else:
+        #     scrollx += (player.rect.x - scrollx - 474)/20
         if player.rect.bottom < 440:
             player.grav += 1
         else:
@@ -427,19 +428,23 @@ def level1():
         if keys_pressed[K_a]:
             player.spritetype = "walk"
             player.direction = "left"
-            if player.rect.x > 268:
-                if player.xacc > -10:
-                    player.xacc -= 1
-            else:
-                player.xacc = 0
+            # if player.rect.x > 268:
+            #     if player.xacc > -10:
+            #         player.xacc -= 1
+            # else:
+            #     player.xacc = 0
+            if player.xacc > -10:
+                player.xacc -= 1
         elif keys_pressed[K_d]:
             player.spritetype = "walk"
             player.direction = "right"
-            if player.rect.x < 948:
-                if player.xacc < 10:
-                    player.xacc += 1
-            else:
-                player.xacc = 0
+            # if player.rect.x < 948:
+            #     if player.xacc < 10:
+            #         player.xacc += 1
+            # else:
+            #     player.xacc = 0
+            if player.xacc < 10:
+                player.xacc += 1
         else:
             player.spritetype = "stand"
             if player.xacc < 0:
