@@ -26,7 +26,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 1
+level = 0
 
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -107,7 +107,7 @@ class Player(Character):
         super().__init__()
         self.rect.x = 268
         self.rect.bottom = 420
-        self.spritesheet = pygame.image.load("stickman spritesheet.png")
+        self.spritesheet = pygame.image.load("stickman_spritesheet.png")
         self.animationvar = 0
         self.spritetype = "stand"
         self.direction = "right"
@@ -175,7 +175,7 @@ class Enemy(Character):
         super().__init__()
         self.rect.x = sw
         self.rect.bottom = 440
-        self.spritesheet = pygame.image.load("enemy spritesheet.png")
+        self.spritesheet = pygame.image.load("enemy_spritesheet.png")
         self.spritetype = "stand"
         self.direction = "right"
         self.attack = False
