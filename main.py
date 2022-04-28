@@ -337,8 +337,11 @@ def level0():
             level = 1
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
+<<<<<<< HEAD
 enemylist = [Enemy()]
 
+=======
+>>>>>>> ea08271732d9980d02465189f45a0b9e0bb16f30
 def level1():
     global level
     countdown = -1
