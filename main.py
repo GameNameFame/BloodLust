@@ -105,7 +105,6 @@ class Character:
 class Player(Character):
     def __init__(self):
         super().__init__()
-        self.rect.x = 268
         self.rect.bottom = 420
         self.spritesheet = pygame.image.load("stickman_spritesheet.png")
         self.animationvar = 0
@@ -290,10 +289,7 @@ def level0():
         pygame.display.flip(); clock.tick(30)
         if countdown > 0:
             countdown -= 1
-        if player.rect.centerx < 585:
-            scrollx += (player.rect.x - scrollx - 268)/20
-        else:
-            scrollx += (player.rect.x - scrollx - 474)/20
+        scrollx += (player.rect.x - scrollx - 268)/20
         if player.rect.bottom < 440:
             player.grav += 1
         else:
@@ -328,19 +324,13 @@ def level0():
         if keys_pressed[K_a]:
             player.spritetype = "walk"
             player.direction = "left"
-            if player.rect.x > 268:
-                if player.xacc > -10:
-                    player.xacc -= 1
-            else:
-                player.xacc = 0
+            if player.xacc > -10:
+                player.xacc -= 1
         elif keys_pressed[K_d]:
             player.spritetype = "walk"
             player.direction = "right"
-            if player.rect.x < 948:
-                if player.xacc < 10:
-                    player.xacc += 1
-            else:
-                player.xacc = 0
+            if player.xacc < 10:
+                player.xacc += 1
         else:
             player.spritetype = "stand"
             if player.xacc < 0:
@@ -379,6 +369,8 @@ def level0():
 def level1():
     global level
     enemylist = [Enemy()]
+    player.rect.x = 0
+    player.direction = "right"
     countdown = -1
     running = True
     scrollx = 0
