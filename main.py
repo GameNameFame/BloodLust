@@ -26,7 +26,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 0
+level = 1
 
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -366,6 +366,9 @@ def level0():
             level = 1
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
+bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, -3]], [[707, 603], [807, -3]], [[669, 603], [769, -3]], [[667, 603], [767, -3]], [[629, 603], [729, -3]], [[627, 603], [727, -3]], [[589, 603], [689, -3]], [[587, 603], [687, -3]], [[549, 603], [649, -3]], [[547, 603], [647, -3]], [[509, 603], [609, -3]], [[507, 603], [607, -3]], [[469, 603], [569, -3]], [[467, 603], [567, -3]], [[429, 603], [529, -3]], [[427, 603], [527, -3]], [[389, 603], 
+[489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
+
 def level1():
     global level
     enemylist = [Enemy()]
@@ -391,6 +394,14 @@ def level1():
         #     scrollx += (player.rect.x - scrollx - 268)/20
         # else:
         #     scrollx += (player.rect.x - scrollx - 474)/20
+        print(bglines)
+        if len(bglines) < 60 and player.animationvar > 7:
+            bglines.append([[-103, 603], [-3, -3]])
+        if bglines[0][0][0] > 803:
+            bglines.pop(0)
+        for line in bglines:
+            line[0][0] += 2
+            line[1][0] += 2
         if player.rect.bottom < 440:
             player.grav += 1
         else:
@@ -483,6 +494,8 @@ def level1():
 
         # display
         displaysurf.fill((255, 60, 0))
+        for line in bglines:
+            pygame.draw.line(displaysurf, (255, 0, 0), line[0], line[1], 6)
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
