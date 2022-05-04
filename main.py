@@ -231,6 +231,7 @@ enemylist = []
 treeimg = pygame.image.load("tree.png")
 bushimg = pygame.image.load("bush.png")
 grassimg = pygame.image.load("grass.png")
+fenceimg = pygame.image.load("fence.png")
 
 def level0():
     speech(0)
@@ -382,7 +383,10 @@ def createChunk(xpos):
     for i in range(7):
         item = rd(0, 2)
         if item == 0:
-            chunksurf.blit(treeimg, (i*128, 184))
+            if i != 0 and i != 6:
+                chunksurf.blit(treeimg, (i*128, 184))
+            else:
+                chunksurf.blit(grassimg, (i*128, 184))
         if item == 1:
             chunksurf.blit(bushimg, (i*128, 184))
         if item == 2:
@@ -391,7 +395,27 @@ def createChunk(xpos):
     chunksurf.set_alpha(230)
     chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
 
+def createEndChunk(xpos):
+    global chunks
+    chunksurf = Surface((800, 600))
+    chunksurf.fill((0, 255, 0))
+    for i in range(7):
+        chunksurf.blit(fenceimg, (i*128, 184))
+    chunksurf.set_colorkey((0, 255, 0))
+    chunksurf.set_alpha(230)
+    chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
+
 createChunk(0)
+createChunk(800)
+createChunk(1600)
+createChunk(2400)
+createChunk(-800)
+createChunk(-1600)
+createChunk(-2400)
+createEndChunk(3200)
+createEndChunk(-3200)
+
+print(chunks)
 
 def level1():
     global level
@@ -451,25 +475,23 @@ def level1():
                 if ev.key == K_z:
                     print(scrollx)
         if keys_pressed[K_a]:
-            player.spritetype = "walk"
-            player.direction = "left"
-            # if player.rect.x > 268:
-            #     if player.xacc > -10:
-            #         player.xacc -= 1
-            # else:
-            #     player.xacc = 0
-            if player.xacc > -10:
-                player.xacc -= 1
+            if player.rect.x > -2442:
+                player.spritetype = "walk"
+                player.direction = "left"
+                if player.xacc > -10:
+                    player.xacc -= 1
+            else:
+                player.spritetype = "stand"
+                player.xacc = 0
         elif keys_pressed[K_d]:
-            player.spritetype = "walk"
-            player.direction = "right"
-            # if player.rect.x < 948:
-            #     if player.xacc < 10:
-            #         player.xacc += 1
-            # else:
-            #     player.xacc = 0
-            if player.xacc < 10:
-                player.xacc += 1
+            if player.rect.x < 3166:
+                player.spritetype = "walk"
+                player.direction = "right"
+                if player.xacc < 10:
+                    player.xacc += 1
+            else:
+                player.spritetype = "stand"
+                player.xacc = 0
         else:
             player.spritetype = "stand"
             if player.xacc < 0:
@@ -514,7 +536,7 @@ def level1():
                 enemy.attack = True
             else:
                 enemy.rect.x += enemy.xacc
-        displayrect.x = -scrollx
+        displayrect.x = scrollx
 
         # display
         displaysurf.fill((255, 60, 0))
