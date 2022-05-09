@@ -64,9 +64,6 @@ def speech(index):
                 if ev.type == QUIT:
                     pygame.quit()
                     sys.exit()
-                if ev.type == KEYDOWN:
-                    if ev.key == K_ESCAPE:
-                        j = 0
             fadebg.set_alpha(j)
             displaysurf.fill((80, 10, 10))
             writetext((10, 480), text[index], txtcolor=(255, 100, 100))
