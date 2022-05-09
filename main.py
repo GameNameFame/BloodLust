@@ -174,9 +174,9 @@ class Player(Character):
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
 
 class Enemy(Character):
-    def __init__(self):
+    def __init__(self, xpos):
         super().__init__()
-        self.rect.x = sw
+        self.rect.x = xpos
         self.rect.bottom = 440
         self.spritesheet = pygame.image.load("enemy_spritesheet.png")
         self.spritetype = "stand"
@@ -188,6 +188,8 @@ class Enemy(Character):
         self.speed = 6
         self.hitpoints = 100
         self.hpcolor = [0, 255, 0]
+        self.attackpower = 2
+        self.selfcollide = False
     def display(self, scrollx):
         if self.direction == "right":
             if self.attack:
@@ -398,7 +400,7 @@ def createChunk(xpos):
         if item == 2:
             chunksurf.blit(grassimg, (i*128, 184))
     chunksurf.set_colorkey((0, 255, 0))
-    chunksurf.set_alpha(230)
+    chunksurf.set_alpha(210)
     chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
 
 def createEndChunk(xpos):
@@ -423,10 +425,10 @@ createEndChunk(-3200)
 
 def level1():
     global level
-    enemylist = [Enemy()]
+    for i in range(3):
+        enemylist.append(Enemy(rd(-3000, 3000)))
     player.rect.x = 0
     player.direction = "right"
-    countdown = -1
     running = True
     scrollx = 0
     while running:
@@ -444,10 +446,7 @@ def level1():
         pygame.display.flip(); clock.tick(30)
 
         scrollx += (player.rect.x - scrollx - 268)/20
-        # if player.rect.centerx < 585:
-        #     scrollx += (player.rect.x - scrollx - 268)/20
-        # else:
-        #     scrollx += (player.rect.x - scrollx - 474)/20
+
         if len(bglines) < 60 and player.animationvar > 7:
             bglines.append([[-103, 603], [-3, -3]])
         if bglines[0][0][0] > 803:
@@ -520,34 +519,47 @@ def level1():
                 for enemy in enemylist:
                     if player.rect.colliderect(enemy.rect) and player.animationvar > 7.5:
                         enemy.hitpoints -= player.attackpower
+                        if player.direction == "right":
+                            enemy.rect.x += 10
+                        else:
+                            enemy.rect.x -= 10
             
         player.rect.y += player.grav
 
         # enemy
         for enemy in enemylist:
-            if player.rect.right < enemy.rect.left:
+            if enemy.rect.colliderect(displayrect):
+                if player.rect.right < enemy.rect.left:
+                    enemy.direction = "left"
+                elif player.rect.left > enemy.rect.right:
+                    enemy.direction = "right"
+
+            if enemy.direction == "left":
                 if enemy.xacc > -enemy.speed:
                     enemy.xacc -= 1
-                enemy.direction = "left"
                 if enemy.rect.x - player.rect.right < 80:
                     enemy.spritetype = "run"
                     enemy.rect.x -= enemy.speed
                 else:
                     enemy.spritetype = "walk"
-            elif player.rect.left > enemy.rect.right:
+            elif enemy.direction == "right":
                 if enemy.xacc < enemy.speed:
                     enemy.xacc += 1
-                enemy.direction = "right"
                 if player.rect.x - enemy.rect.right < 80:
                     enemy.spritetype = "run"
                     enemy.rect.x += enemy.speed
                 else:
                     enemy.spritetype = "walk"
+
             if enemy.rect.colliderect(player.rect):
                 if not enemy.attack:
                     enemy.animationvar = 0
                     enemy.attackno = 3*128
-                    player.hitpoints -= 4
+                    player.hitpoints -= enemy.attackpower
+                    if enemy.direction == "right":
+                        player.rect.x += 10
+                    else:
+                        player.rect.x -= 10
                 enemy.attack = True
             else:
                 enemy.rect.x += enemy.xacc
@@ -565,19 +577,15 @@ def level1():
         player.display(scrollx)
         for enemy in enemylist:
             enemy.display(scrollx)
-            enemy.hpcolor = [220 - enemy.hitpoints*2, enemy.hitpoints*2 - 20, 0]
-            for color in enemy.hpcolor:
-                if color < 0:
-                    color = 0
-            print(enemy.hpcolor)
             pygame.draw.rect(displaysurf, (0, 0, 0), (enemy.rect.x - 2 - scrollx, enemy.rect.y - 22, 54, 14))
-            pygame.draw.rect(displaysurf, enemy.hpcolor, (enemy.rect.x - scrollx, enemy.rect.y - 20, enemy.hitpoints//2, 10))
-        pygame.draw.rect(displaysurf, (0, 0, 0), (58, 58, 204, 34))
+            enemy.hpcolor = [220 - enemy.hitpoints*2, enemy.hitpoints*2 - 20, 0]
+            try:
+                pygame.draw.rect(displaysurf, enemy.hpcolor, (enemy.rect.x - scrollx, enemy.rect.y - 20, enemy.hitpoints//2, 10))
+            except ValueError:
+                enemylist.remove(enemy)
+        pygame.draw.rect(displaysurf, (0, 0, 0), (28, 58, 204, 34))
         player.hpcolor = [220 - player.hitpoints*2, player.hitpoints*2 - 20, 0]
-        for color in player.hpcolor:
-            if color < 0:
-                color = 0
-        pygame.draw.rect(displaysurf, player.hpcolor, (60, 60, player.hitpoints*2, 30))
+        pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 def screen_fade():
