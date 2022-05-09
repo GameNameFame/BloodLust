@@ -5,7 +5,7 @@ from random import randint as rd
 import pyttsx3
 
 engine = pyttsx3.init()
-engine.setProperty('rate', 140)  #120 words per minute
+engine.setProperty('rate', 160)
 voices = engine.getProperty('voices')
 engine.setProperty('voice', voices[0].id) 
 engine.setProperty('volume', 1) 
@@ -26,7 +26,8 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 1
+level = 0
+##level = 1
 
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -63,6 +64,9 @@ def speech(index):
                 if ev.type == QUIT:
                     pygame.quit()
                     sys.exit()
+                if ev.type == KEYDOWN:
+                    if ev.key == K_ESCAPE:
+                        j = 0
             fadebg.set_alpha(j)
             displaysurf.fill((80, 10, 10))
             writetext((10, 480), text[index], txtcolor=(255, 100, 100))
@@ -611,4 +615,3 @@ def menuloop():
 
 if __name__ == "__main__":
     menuloop()
-    
