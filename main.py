@@ -426,7 +426,7 @@ createEndChunk(-3200)
 def level1():
     global level
     for i in range(3):
-        enemylist.append(Enemy(rd(-3000, 3000)))
+        enemylist.append(Enemy(rd(-2000, 3000)))
     player.rect.x = 0
     player.direction = "right"
     running = True
@@ -520,9 +520,9 @@ def level1():
                     if player.rect.colliderect(enemy.rect) and player.animationvar > 7.5:
                         enemy.hitpoints -= player.attackpower
                         if player.direction == "right":
-                            enemy.rect.x += 10
+                            enemy.rect.x += 20
                         else:
-                            enemy.rect.x -= 10
+                            enemy.rect.x -= 20
             
         player.rect.y += player.grav
 
@@ -533,7 +533,21 @@ def level1():
                     enemy.direction = "left"
                 elif player.rect.left > enemy.rect.right:
                     enemy.direction = "right"
-
+        
+        for j in range(len(enemylist)):
+            for i in range(len(enemylist)):
+                if i%2 == 0 and not j%2 == 0:
+                    enemy = enemylist[j]
+                    enemy2 = enemylist[i]
+                    if enemy.rect.x > enemy2.rect.x:
+                        if enemy.rect.x - enemy2.rect.x < 100:
+                            enemy.direction = "right"
+                            enemy2.direction = "left"
+                    else:
+                        if enemy2.rect.x - enemy.rect.x < 100:
+                            enemy.direction = "left"
+                            enemy2.direction = "right"
+        for enemy in enemylist:
             if enemy.direction == "left":
                 if enemy.xacc > -enemy.speed:
                     enemy.xacc -= 1
@@ -557,9 +571,9 @@ def level1():
                     enemy.attackno = 3*128
                     player.hitpoints -= enemy.attackpower
                     if enemy.direction == "right":
-                        player.rect.x += 10
+                        player.rect.x += 20
                     else:
-                        player.rect.x -= 10
+                        player.rect.x -= 20
                 enemy.attack = True
             else:
                 enemy.rect.x += enemy.xacc
