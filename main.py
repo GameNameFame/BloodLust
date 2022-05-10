@@ -425,9 +425,11 @@ createEndChunk(-3200)
 
 def level1():
     global level
-    for i in range(3):
-        enemylist.append(Enemy(rd(-2000, 3000)))
+    enemylist.append(Enemy(-2315))
+    enemylist.append(Enemy(-1000))
+    enemylist.append(Enemy(-2055))
     player.rect.x = 0
+    player.hitpoint = 100
     player.direction = "right"
     running = True
     scrollx = 0
