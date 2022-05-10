@@ -382,7 +382,6 @@ def level0():
 bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, -3]], [[707, 603], [807, -3]], [[669, 603], [769, -3]], [[667, 603], [767, -3]], [[629, 603], [729, -3]], [[627, 603], [727, -3]], [[589, 603], [689, -3]], [[587, 603], [687, -3]], [[549, 603], [649, -3]], [[547, 603], [647, -3]], [[509, 603], [609, -3]], [[507, 603], [607, -3]], [[469, 603], [569, -3]], [[467, 603], [567, -3]], [[429, 603], [529, -3]], [[427, 603], [527, -3]], [[389, 603], 
 [489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
 
-chunks = []
 
 def createChunk(xpos):
     global chunks
@@ -413,26 +412,26 @@ def createEndChunk(xpos):
     chunksurf.set_alpha(230)
     chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
 
-createChunk(0)
-createChunk(800)
-createChunk(1600)
-createChunk(2400)
-createChunk(-800)
-createChunk(-1600)
-createChunk(-2400)
-createEndChunk(3200)
-createEndChunk(-3200)
+chunks = []
 
 def level1():
-    global level
-    enemylist.append(Enemy(-2315))
-    enemylist.append(Enemy(-1000))
-    enemylist.append(Enemy(-2055))
+    global level, chunks
+    chunks = []
+    chunkpos = [0, 800, 1600, 2400, -800, -1600, -2400]
+
+    for pos in chunkpos:
+        createChunk(pos)
+    createEndChunk(3200)
+    createEndChunk(-3200)
+    enemylist.append(Enemy(-3015))
+    enemylist.append(Enemy(1000))
+    enemylist.append(Enemy(2055))
     player.rect.x = 0
     player.hitpoint = 100
     player.direction = "right"
     running = True
     scrollx = 0
+    bganim = 0
     while running:
         keys_pressed = pygame.key.get_pressed()
 
@@ -444,12 +443,16 @@ def level1():
             enemy.animationvar += 0.4
             if enemy.animationvar > 8:
                 enemy.animationvar = 0
+        
+        bganim += 0.4
+        if bganim > 8:
+            bganim = 0
 
         pygame.display.flip(); clock.tick(30)
 
         scrollx += (player.rect.x - scrollx - 268)/20
 
-        if len(bglines) < 60 and player.animationvar > 7:
+        if len(bglines) < 60 and bganim > 7:
             bglines.append([[-103, 603], [-3, -3]])
         if bglines[0][0][0] > 803:
             bglines.pop(0)
@@ -519,7 +522,7 @@ def level1():
                 player.grav = -12
             if player.attackno == 3*128:
                 for enemy in enemylist:
-                    if player.rect.colliderect(enemy.rect) and player.animationvar > 7.5:
+                    if player.rect.colliderect(enemy.rect) and player.animationvar == 2:
                         enemy.hitpoints -= player.attackpower
                         if player.direction == "right":
                             enemy.rect.x += 20
@@ -538,7 +541,7 @@ def level1():
         
         for j in range(len(enemylist)):
             for i in range(len(enemylist)):
-                if i%2 == 0 and not j%2 == 0:
+                if i%2 == 0 and not j%2 == 0 and (enemylist[i].rect.colliderect(displayrect) or enemylist[j].rect.colliderect(displayrect)):
                     enemy = enemylist[j]
                     enemy2 = enemylist[i]
                     if enemy.rect.x > enemy2.rect.x:
@@ -551,34 +554,55 @@ def level1():
                             enemy2.direction = "right"
         for enemy in enemylist:
             if enemy.direction == "left":
-                if enemy.xacc > -enemy.speed:
-                    enemy.xacc -= 1
                 if enemy.rect.x - player.rect.right < 80:
                     enemy.spritetype = "run"
-                    enemy.rect.x -= enemy.speed
                 else:
                     enemy.spritetype = "walk"
+                if enemy.spritetype != "stand":
+                    if enemy.xacc > -enemy.speed:
+                        enemy.xacc -= 1
+                else:
+                    if enemy.xacc < 0:
+                        enemy.xacc += 1
             elif enemy.direction == "right":
-                if enemy.xacc < enemy.speed:
-                    enemy.xacc += 1
                 if player.rect.x - enemy.rect.right < 80:
                     enemy.spritetype = "run"
-                    enemy.rect.x += enemy.speed
                 else:
                     enemy.spritetype = "walk"
+                if enemy.spritetype != "stand":
+                    if enemy.xacc < enemy.speed:
+                        enemy.xacc += 1
+                else:
+                    if enemy.xacc > 0:
+                        enemy.xacc -= 1
 
             if enemy.rect.colliderect(player.rect):
                 if not enemy.attack:
-                    enemy.animationvar = 0
-                    enemy.attackno = 3*128
-                    player.hitpoints -= enemy.attackpower
-                    if enemy.direction == "right":
-                        player.rect.x += 20
+                    if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
+                        pass
+                    elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
+                        pass
                     else:
-                        player.rect.x -= 20
+                        enemy.animationvar = 0
+                        enemy.attackno = 3*128
+                        player.hitpoints -= enemy.attackpower
+                        if enemy.direction == "right":
+                            if player.rect.x < 3166:
+                                player.rect.x += 20
+                        else:
+                            if player.rect.x > -2442:
+                                player.rect.x -= 20
                 enemy.attack = True
             else:
-                enemy.rect.x += enemy.xacc
+                if enemy.spritetype == "run":
+                    enemy.rect.x += enemy.xacc
+                elif enemy.spritetype == "walk":
+                    enemy.rect.x += enemy.xacc/2
+        for enemy in enemylist:
+            if enemy.rect.x > 3166:
+                enemy.rect.x = 3166
+            if enemy.rect.x < -2442:
+                enemy.rect.x = -2442
         displayrect.x = scrollx
 
         # display
@@ -602,7 +626,232 @@ def level1():
         pygame.draw.rect(displaysurf, (0, 0, 0), (28, 58, 204, 34))
         player.hpcolor = [220 - player.hitpoints*2, player.hitpoints*2 - 20, 0]
         pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
+        writetext((30, 120), f"Kills remaining : {len(enemylist)}")
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+        if len(enemylist) == 0:
+            running = False
+            level = 2
+
+def level2():
+    global level, chunks
+    speech(7)
+    speech(8)
+    speech(9)
+    chunks = []
+    chunkpos = [0, 800, 1600, 2400, -800, -1600, -2400]
+
+    for pos in chunkpos:
+        createChunk(pos)
+    createEndChunk(3200)
+    createEndChunk(-3200)
+    # enemylist.append(Enemy(-3015))
+    # enemylist.append(Enemy(1000))
+    # enemylist.append(Enemy(2055))
+    player.rect.x = 0
+    player.hitpoint = 100
+    player.direction = "right"
+    running = True
+    scrollx = 0
+    bganim = 0
+    while running:
+        keys_pressed = pygame.key.get_pressed()
+
+        player.animationvar += 0.4
+        if player.animationvar > 8:
+            player.animationvar = 0
+
+        for enemy in enemylist:
+            enemy.animationvar += 0.4
+            if enemy.animationvar > 8:
+                enemy.animationvar = 0
+        
+        bganim += 0.4
+        if bganim > 8:
+            bganim = 0
+
+        pygame.display.flip(); clock.tick(30)
+
+        scrollx += (player.rect.x - scrollx - 268)/20
+
+        if len(bglines) < 60 and bganim > 7:
+            bglines.append([[-103, 603], [-3, -3]])
+        if bglines[0][0][0] > 803:
+            bglines.pop(0)
+        for line in bglines:
+            line[0][0] += 2
+            line[1][0] += 2
+
+        if player.rect.bottom < 440:
+            player.grav += 1
+        else:
+            player.grav = 0
+            player.rect.bottom = 440
+
+        for ev in pygame.event.get():
+            if ev.type == QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if ev.type == KEYDOWN:
+                if ev.key == K_ESCAPE:
+                    # pause the game
+                    running = False
+                if ev.key == K_SPACE:
+                    player.attack = True 
+                    player.animationvar = 0
+                    player.attackno = 2*128
+                if ev.key == K_w:
+                    if player.rect.bottom == 440:
+                        player.grav = -18
+                if ev.key == K_x:
+                    print(player.rect.x)
+                if ev.key == K_z:
+                    print(scrollx)
+                
+        if keys_pressed[K_a]:
+            if player.rect.x > -2442:
+                player.spritetype = "walk"
+                player.direction = "left"
+                if player.xacc > -10:
+                    player.xacc -= 1
+            else:
+                player.spritetype = "stand"
+                player.xacc = 0
+        elif keys_pressed[K_d]:
+            if player.rect.x < 3166:
+                player.spritetype = "walk"
+                player.direction = "right"
+                if player.xacc < 10:
+                    player.xacc += 1
+            else:
+                player.spritetype = "stand"
+                player.xacc = 0
+        else:
+            player.spritetype = "stand"
+            if player.xacc < 0:
+                player.xacc += 1
+            elif player.xacc > 0:
+                player.xacc -= 1
+
+        if not keys_pressed[K_LSHIFT]:
+            player.rect.x += player.xacc/2
+        elif player.spritetype == "walk":
+            player.spritetype = "run"
+            player.rect.x += player.xacc
+        if player.attack:
+            if player.attackno == 2*128 and player.animationvar > 7.5 and keys_pressed[K_LSHIFT]:
+                player.grav = -12
+            if player.attackno == 3*128:
+                for enemy in enemylist:
+                    if player.rect.colliderect(enemy.rect) and player.animationvar == 2:
+                        enemy.hitpoints -= player.attackpower
+                        if player.direction == "right":
+                            enemy.rect.x += 20
+                        else:
+                            enemy.rect.x -= 20
+            
+        player.rect.y += player.grav
+
+        # enemy
+        for enemy in enemylist:
+            if enemy.rect.colliderect(displayrect):
+                if player.rect.right < enemy.rect.left:
+                    enemy.direction = "left"
+                elif player.rect.left > enemy.rect.right:
+                    enemy.direction = "right"
+        
+        for j in range(len(enemylist)):
+            for i in range(len(enemylist)):
+                if i%2 == 0 and not j%2 == 0 and (enemylist[i].rect.colliderect(displayrect) or enemylist[j].rect.colliderect(displayrect)):
+                    enemy = enemylist[j]
+                    enemy2 = enemylist[i]
+                    if enemy.rect.x > enemy2.rect.x:
+                        if enemy.rect.x - enemy2.rect.x < 100:
+                            enemy.direction = "right"
+                            enemy2.direction = "left"
+                    else:
+                        if enemy2.rect.x - enemy.rect.x < 100:
+                            enemy.direction = "left"
+                            enemy2.direction = "right"
+        for enemy in enemylist:
+            if enemy.direction == "left":
+                if enemy.rect.x - player.rect.right < 80:
+                    enemy.spritetype = "run"
+                else:
+                    enemy.spritetype = "walk"
+                if enemy.spritetype != "stand":
+                    if enemy.xacc > -enemy.speed:
+                        enemy.xacc -= 1
+                else:
+                    if enemy.xacc < 0:
+                        enemy.xacc += 1
+            elif enemy.direction == "right":
+                if player.rect.x - enemy.rect.right < 80:
+                    enemy.spritetype = "run"
+                else:
+                    enemy.spritetype = "walk"
+                if enemy.spritetype != "stand":
+                    if enemy.xacc < enemy.speed:
+                        enemy.xacc += 1
+                else:
+                    if enemy.xacc > 0:
+                        enemy.xacc -= 1
+
+            if enemy.rect.colliderect(player.rect):
+                if not enemy.attack:
+                    if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
+                        pass
+                    elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
+                        pass
+                    else:
+                        enemy.animationvar = 0
+                        enemy.attackno = 3*128
+                        player.hitpoints -= enemy.attackpower
+                        if enemy.direction == "right":
+                            if player.rect.x < 3166:
+                                player.rect.x += 20
+                        else:
+                            if player.rect.x > -2442:
+                                player.rect.x -= 20
+                enemy.attack = True
+            else:
+                if enemy.spritetype == "run":
+                    enemy.rect.x += enemy.xacc
+                elif enemy.spritetype == "walk":
+                    enemy.rect.x += enemy.xacc/2
+        for enemy in enemylist:
+            if enemy.rect.x > 3166:
+                enemy.rect.x = 3166
+            if enemy.rect.x < -2442:
+                enemy.rect.x = -2442
+        displayrect.x = scrollx
+
+        # display
+        displaysurf.fill((255, 60, 0))
+        for line in bglines:
+            pygame.draw.line(displaysurf, (255, 0, 0), line[0], line[1], 6)
+        for chunk in chunks:
+            if chunk[0].colliderect(displayrect):
+                displaysurf.blit(chunk[1], (chunk[0].x - scrollx, 0))
+        pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
+        pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
+        player.display(scrollx)
+        for enemy in enemylist:
+            enemy.display(scrollx)
+            pygame.draw.rect(displaysurf, (0, 0, 0), (enemy.rect.x - 2 - scrollx, enemy.rect.y - 22, 54, 14))
+            enemy.hpcolor = [220 - enemy.hitpoints*2, enemy.hitpoints*2 - 20, 0]
+            try:
+                pygame.draw.rect(displaysurf, enemy.hpcolor, (enemy.rect.x - scrollx, enemy.rect.y - 20, enemy.hitpoints//2, 10))
+            except ValueError:
+                enemylist.remove(enemy)
+        pygame.draw.rect(displaysurf, (0, 0, 0), (28, 58, 204, 34))
+        player.hpcolor = [220 - player.hitpoints*2, player.hitpoints*2 - 20, 0]
+        pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
+        writetext((30, 120), f"Kills remaining : {len(enemylist)}")
+        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+        if len(enemylist) == 0:
+            running = False
+            level = 3
 
 def screen_fade():
     j = 0
@@ -645,6 +894,9 @@ def menuloop():
                         if level == 1:
                             screen_fade()
                             level1()
+                        if level == 2:
+                            screen_fade()
+                            level2()
                     elif i == 1:
                         #settings
                         pass
