@@ -423,9 +423,8 @@ def level1():
         createChunk(pos)
     createEndChunk(3200)
     createEndChunk(-3200)
-    enemylist.append(Enemy(-3015))
-    enemylist.append(Enemy(1000))
-    enemylist.append(Enemy(2055))
+    for i in range(3):
+        enemylist.append(Enemy(rd(-3000, 3000)))
     player.rect.x = 0
     player.hitpoint = 100
     player.direction = "right"
@@ -465,6 +464,13 @@ def level1():
         else:
             player.grav = 0
             player.rect.bottom = 440
+
+        for enemy in enemylist:
+            if enemy.rect.bottom < 440:
+                enemy.grav += 1
+            else:
+                enemy.grav = 0
+                enemy.rect.bottom = 440
 
         for ev in pygame.event.get():
             if ev.type == QUIT:
@@ -522,14 +528,17 @@ def level1():
                 player.grav = -12
             if player.attackno == 3*128:
                 for enemy in enemylist:
-                    if player.rect.colliderect(enemy.rect) and player.animationvar == 2:
+                    if player.rect.colliderect(enemy.rect):
                         enemy.hitpoints -= player.attackpower
+                        enemy.grav = -6
                         if player.direction == "right":
-                            enemy.rect.x += 20
+                            enemy.rect.x += 60
                         else:
-                            enemy.rect.x -= 20
+                            enemy.rect.x -= 60
             
         player.rect.y += player.grav
+        for enemy in enemylist:
+            enemy.rect.y += enemy.grav
 
         # enemy
         for enemy in enemylist:
@@ -538,7 +547,8 @@ def level1():
                     enemy.direction = "left"
                 elif player.rect.left > enemy.rect.right:
                     enemy.direction = "right"
-        
+            else:
+                enemy.spritetype = "stand"
         for j in range(len(enemylist)):
             for i in range(len(enemylist)):
                 if i%2 == 0 and not j%2 == 0 and (enemylist[i].rect.colliderect(displayrect) or enemylist[j].rect.colliderect(displayrect)):
@@ -553,51 +563,52 @@ def level1():
                             enemy.direction = "left"
                             enemy2.direction = "right"
         for enemy in enemylist:
-            if enemy.direction == "left":
-                if enemy.rect.x - player.rect.right < 80:
-                    enemy.spritetype = "run"
-                else:
-                    enemy.spritetype = "walk"
-                if enemy.spritetype != "stand":
-                    if enemy.xacc > -enemy.speed:
-                        enemy.xacc -= 1
-                else:
-                    if enemy.xacc < 0:
-                        enemy.xacc += 1
-            elif enemy.direction == "right":
-                if player.rect.x - enemy.rect.right < 80:
-                    enemy.spritetype = "run"
-                else:
-                    enemy.spritetype = "walk"
-                if enemy.spritetype != "stand":
-                    if enemy.xacc < enemy.speed:
-                        enemy.xacc += 1
-                else:
-                    if enemy.xacc > 0:
-                        enemy.xacc -= 1
-
-            if enemy.rect.colliderect(player.rect):
-                if not enemy.attack:
-                    if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
-                        pass
-                    elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
-                        pass
+            if enemy.rect.colliderect(displayrect):
+                if enemy.direction == "left":
+                    if enemy.rect.x - player.rect.right < 80 and enemy.rect.y == 440:
+                        enemy.spritetype = "run"
                     else:
-                        enemy.animationvar = 0
-                        enemy.attackno = 3*128
-                        player.hitpoints -= enemy.attackpower
-                        if enemy.direction == "right":
-                            if player.rect.x < 3166:
-                                player.rect.x += 20
+                        enemy.spritetype = "walk"
+                    if enemy.spritetype != "stand":
+                        if enemy.xacc > -enemy.speed:
+                            enemy.xacc -= 1
+                    else:
+                        if enemy.xacc < 0:
+                            enemy.xacc += 1
+                elif enemy.direction == "right":
+                    if player.rect.x - enemy.rect.right < 80 and enemy.rect.y == 440:
+                        enemy.spritetype = "run"
+                    else:
+                        enemy.spritetype = "walk"
+                    if enemy.spritetype != "stand":
+                        if enemy.xacc < enemy.speed:
+                            enemy.xacc += 1
+                    else:
+                        if enemy.xacc > 0:
+                            enemy.xacc -= 1
+
+                if enemy.rect.colliderect(player.rect):
+                    if not enemy.attack:
+                        if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
+                            pass
+                        elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
+                            pass
                         else:
-                            if player.rect.x > -2442:
-                                player.rect.x -= 20
-                enemy.attack = True
-            else:
-                if enemy.spritetype == "run":
-                    enemy.rect.x += enemy.xacc
-                elif enemy.spritetype == "walk":
-                    enemy.rect.x += enemy.xacc/2
+                            enemy.animationvar = 0
+                            enemy.attackno = 3*128
+                            player.hitpoints -= enemy.attackpower
+                            if enemy.direction == "right":
+                                if player.rect.x < 3166:
+                                    player.rect.x += 30
+                            else:
+                                if player.rect.x > -2442:
+                                    player.rect.x -= 30
+                    enemy.attack = True
+                else:
+                    if enemy.spritetype == "run":
+                        enemy.rect.x += enemy.xacc
+                    elif enemy.spritetype == "walk":
+                        enemy.rect.x += enemy.xacc/2
         for enemy in enemylist:
             if enemy.rect.x > 3166:
                 enemy.rect.x = 3166
@@ -746,9 +757,9 @@ def level2():
                     if player.rect.colliderect(enemy.rect) and player.animationvar == 2:
                         enemy.hitpoints -= player.attackpower
                         if player.direction == "right":
-                            enemy.rect.x += 20
+                            enemy.rect.x += 40
                         else:
-                            enemy.rect.x -= 20
+                            enemy.rect.x -= 40
             
         player.rect.y += player.grav
 
