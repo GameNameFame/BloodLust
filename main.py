@@ -27,7 +27,6 @@ wadpic = pygame.image.load("wad.png")
 
 speaking = False
 level = 0
-level = 1
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -242,9 +241,8 @@ grassimg = pygame.image.load("grass.png")
 fenceimg = pygame.image.load("fence.png")
 
 def level0():
-    speech(0)
-    speech(1)
-    speech(2)
+    for i in range(0, 2):
+        speech(i)
     global level
     running = True
     firsthit = False
@@ -417,12 +415,11 @@ chunks = []
 def level1():
     global level, chunks
     chunks = []
-    chunkpos = [0, 800, 1600, 2400, -800, -1600, -2400]
-
-    for pos in chunkpos:
-        createChunk(pos)
-    createEndChunk(3200)
-    createEndChunk(-3200)
+    for i in range(-3200, 3200, 800):
+        if i == -3200 or i == 3200:
+            createEndChunk(i)
+        else:
+            createChunk(i)
     for i in range(3):
         enemylist.append(Enemy(rd(-3000, 3000)))
     player.rect.x = 0
@@ -651,19 +648,16 @@ def level1():
 
 def level2():
     global level, chunks
-    speech(7)
-    speech(8)
-    speech(9)
+    for i in range(7, 9):
+        speech(i)
     chunks = []
-    chunkpos = [0, 800, 1600, 2400, -800, -1600, -2400]
-
-    for pos in chunkpos:
-        createChunk(pos)
-    createEndChunk(3200)
-    createEndChunk(-3200)
-    # enemylist.append(Enemy(-3015))
-    # enemylist.append(Enemy(1000))
-    # enemylist.append(Enemy(2055))
+    for i in range(-5600, 5600, 800):
+        if i == -5600 or i == 5600:
+            createEndChunk(i)
+        else:
+            createChunk(i)
+    for i in range(8):
+        enemylist.append(Enemy(rd(-5200, 5200)))
     player.rect.x = 0
     player.hitpoint = 100
     player.direction = "right"
@@ -911,9 +905,9 @@ def menuloop():
                         if level == 1:
                             screen_fade()
                             level1()
-                        if level == 2:
-                            screen_fade()
-                            level2()
+                        # if level == 2:
+                        #     screen_fade()
+                        #     level2()
                     elif i == 1:
                         #settings
                         pass
