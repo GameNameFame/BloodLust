@@ -638,6 +638,12 @@ def level1():
         player.hpcolor = [220 - player.hitpoints*2, player.hitpoints*2 - 20, 0]
         pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
         writetext((30, 120), f"Kills remaining : {len(enemylist)}")
+        for enemy in enemylist:
+            if not enemy.rect.colliderect(displayrect):
+                if enemy.rect.x > displayrect.right:
+                    pygame.draw.polygon(displaysurf, (255, 180, 0), ((760, 280), (760, 320), (780, 300)))
+                elif enemy.rect.right < displayrect.x:
+                    pygame.draw.polygon(displaysurf, (255, 180, 0), ((40, 280), (40, 320), (20, 300)))
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         if len(enemylist) == 0:
             running = False
