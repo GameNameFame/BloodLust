@@ -240,10 +240,56 @@ bushimg = pygame.image.load("bush.png")
 grassimg = pygame.image.load("grass.png")
 fenceimg = pygame.image.load("fence.png")
 
+def createChunk(xpos):
+    global chunks
+    chunksurf = Surface((800, 600))
+    chunksurf.fill((0, 255, 0))
+    for i in range(7):
+        item = rd(0, 2)
+        if item == 0:
+            if i != 0 and i != 6:
+                chunksurf.blit(treeimg, (i*128, 184))
+            else:
+                chunksurf.blit(grassimg, (i*128, 184))
+        if item == 1:
+            chunksurf.blit(bushimg, (i*128, 184))
+        if item == 2:
+            chunksurf.blit(grassimg, (i*128, 184))
+    chunksurf.set_colorkey((0, 255, 0))
+    chunksurf.set_alpha(210)
+    chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
+
+def createGrassChunk(xpos):
+    global chunks
+    chunksurf = Surface((800, 600))
+    chunksurf.fill((0, 255, 0))
+    for i in range(7):
+        chunksurf.blit(grassimg, (i*128, 184))
+    chunksurf.set_colorkey((0, 255, 0))
+    chunksurf.set_alpha(210)
+    chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
+
+def createEndChunk(xpos):
+    global chunks
+    chunksurf = Surface((800, 600))
+    chunksurf.fill((0, 255, 0))
+    for i in range(7):
+        chunksurf.blit(fenceimg, (i*128, 184))
+    chunksurf.set_colorkey((0, 255, 0))
+    chunksurf.set_alpha(230)
+    chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
+
+chunks = []
+
+bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, -3]], [[707, 603], [807, -3]], [[669, 603], [769, -3]], [[667, 603], [767, -3]], [[629, 603], [729, -3]], [[627, 603], [727, -3]], [[589, 603], [689, -3]], [[587, 603], [687, -3]], [[549, 603], [649, -3]], [[547, 603], [647, -3]], [[509, 603], [609, -3]], [[507, 603], [607, -3]], [[469, 603], [569, -3]], [[467, 603], [567, -3]], [[429, 603], [529, -3]], [[427, 603], [527, -3]], [[389, 603], 
+[489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
+
 def level0():
-    for i in range(0, 2):
-        speech(i)
-    global level
+    # for i in range(0, 2):
+    #     speech(i)
+    global level, chunks
+    chunks = []
+    createGrassChunk(0)
     running = True
     firsthit = False
     instruct = 0
@@ -300,7 +346,6 @@ def level0():
         pygame.display.flip(); clock.tick(30)
         if countdown > 0:
             countdown -= 1
-        scrollx += (player.rect.x - scrollx - 268)/20
         if player.rect.bottom < 440:
             player.grav += 1
         else:
@@ -333,15 +378,25 @@ def level0():
                 if ev.key == K_z:
                     print(scrollx)
         if keys_pressed[K_a]:
-            player.spritetype = "walk"
             player.direction = "left"
-            if player.xacc > -10:
-                player.xacc -= 1
+            if player.rect.x > 2:
+                player.spritetype = "walk"
+                if player.xacc > -10:
+                    player.xacc -= 1
+            else:
+                player.rect.x = 0
+                player.xacc = 0
+                player.spritetype = "stand"
         elif keys_pressed[K_d]:
-            player.spritetype = "walk"
             player.direction = "right"
-            if player.xacc < 10:
-                player.xacc += 1
+            if player.rect.right < 798:
+                player.spritetype = "walk"
+                if player.xacc < 10:
+                    player.xacc += 1
+            else:
+                player.rect.x = 736
+                player.xacc = 0
+                player.spritetype = "stand"
         else:
             player.spritetype = "stand"
             if player.xacc < 0:
@@ -375,47 +430,13 @@ def level0():
             speech(6)
             running = False
             level = 1
+        displaysurf.blit(chunks[0][1], (chunks[0][0].x, 0))
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
-
-bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, -3]], [[707, 603], [807, -3]], [[669, 603], [769, -3]], [[667, 603], [767, -3]], [[629, 603], [729, -3]], [[627, 603], [727, -3]], [[589, 603], [689, -3]], [[587, 603], [687, -3]], [[549, 603], [649, -3]], [[547, 603], [647, -3]], [[509, 603], [609, -3]], [[507, 603], [607, -3]], [[469, 603], [569, -3]], [[467, 603], [567, -3]], [[429, 603], [529, -3]], [[427, 603], [527, -3]], [[389, 603], 
-[489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
-
-
-def createChunk(xpos):
-    global chunks
-    chunksurf = Surface((800, 600))
-    chunksurf.fill((0, 255, 0))
-    for i in range(7):
-        item = rd(0, 2)
-        if item == 0:
-            if i != 0 and i != 6:
-                chunksurf.blit(treeimg, (i*128, 184))
-            else:
-                chunksurf.blit(grassimg, (i*128, 184))
-        if item == 1:
-            chunksurf.blit(bushimg, (i*128, 184))
-        if item == 2:
-            chunksurf.blit(grassimg, (i*128, 184))
-    chunksurf.set_colorkey((0, 255, 0))
-    chunksurf.set_alpha(210)
-    chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
-
-def createEndChunk(xpos):
-    global chunks
-    chunksurf = Surface((800, 600))
-    chunksurf.fill((0, 255, 0))
-    for i in range(7):
-        chunksurf.blit(fenceimg, (i*128, 184))
-    chunksurf.set_colorkey((0, 255, 0))
-    chunksurf.set_alpha(230)
-    chunks.append([Rect(xpos, 0, 800, 600), chunksurf])
-
-chunks = []
 
 def level1():
     global level, chunks
     chunks = []
-    for i in range(-3200, 3200, 800):
+    for i in range(-3200, 4000, 800):
         if i == -3200 or i == 3200:
             createEndChunk(i)
         else:
@@ -651,7 +672,7 @@ def level2():
     for i in range(7, 9):
         speech(i)
     chunks = []
-    for i in range(-5600, 5600, 800):
+    for i in range(-5600, 6200, 800):
         if i == -5600 or i == 5600:
             createEndChunk(i)
         else:
@@ -697,6 +718,13 @@ def level2():
         else:
             player.grav = 0
             player.rect.bottom = 440
+
+        for enemy in enemylist:
+            if enemy.rect.bottom < 440:
+                enemy.grav += 1
+            else:
+                enemy.grav = 0
+                enemy.rect.bottom = 440
 
         for ev in pygame.event.get():
             if ev.type == QUIT:
@@ -754,14 +782,17 @@ def level2():
                 player.grav = -12
             if player.attackno == 3*128:
                 for enemy in enemylist:
-                    if player.rect.colliderect(enemy.rect) and player.animationvar == 2:
+                    if player.rect.colliderect(enemy.rect):
                         enemy.hitpoints -= player.attackpower
+                        enemy.grav = -6
                         if player.direction == "right":
-                            enemy.rect.x += 40
+                            enemy.rect.x += 60
                         else:
-                            enemy.rect.x -= 40
+                            enemy.rect.x -= 60
             
         player.rect.y += player.grav
+        for enemy in enemylist:
+            enemy.rect.y += enemy.grav
 
         # enemy
         for enemy in enemylist:
@@ -770,7 +801,8 @@ def level2():
                     enemy.direction = "left"
                 elif player.rect.left > enemy.rect.right:
                     enemy.direction = "right"
-        
+            else:
+                enemy.spritetype = "stand"
         for j in range(len(enemylist)):
             for i in range(len(enemylist)):
                 if i%2 == 0 and not j%2 == 0 and (enemylist[i].rect.colliderect(displayrect) or enemylist[j].rect.colliderect(displayrect)):
@@ -785,51 +817,52 @@ def level2():
                             enemy.direction = "left"
                             enemy2.direction = "right"
         for enemy in enemylist:
-            if enemy.direction == "left":
-                if enemy.rect.x - player.rect.right < 80:
-                    enemy.spritetype = "run"
-                else:
-                    enemy.spritetype = "walk"
-                if enemy.spritetype != "stand":
-                    if enemy.xacc > -enemy.speed:
-                        enemy.xacc -= 1
-                else:
-                    if enemy.xacc < 0:
-                        enemy.xacc += 1
-            elif enemy.direction == "right":
-                if player.rect.x - enemy.rect.right < 80:
-                    enemy.spritetype = "run"
-                else:
-                    enemy.spritetype = "walk"
-                if enemy.spritetype != "stand":
-                    if enemy.xacc < enemy.speed:
-                        enemy.xacc += 1
-                else:
-                    if enemy.xacc > 0:
-                        enemy.xacc -= 1
-
-            if enemy.rect.colliderect(player.rect):
-                if not enemy.attack:
-                    if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
-                        pass
-                    elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
-                        pass
+            if enemy.rect.colliderect(displayrect):
+                if enemy.direction == "left":
+                    if enemy.rect.x - player.rect.right < 80 and enemy.rect.y == 440:
+                        enemy.spritetype = "run"
                     else:
-                        enemy.animationvar = 0
-                        enemy.attackno = 3*128
-                        player.hitpoints -= enemy.attackpower
-                        if enemy.direction == "right":
-                            if player.rect.x < 3166:
-                                player.rect.x += 20
+                        enemy.spritetype = "walk"
+                    if enemy.spritetype != "stand":
+                        if enemy.xacc > -enemy.speed:
+                            enemy.xacc -= 1
+                    else:
+                        if enemy.xacc < 0:
+                            enemy.xacc += 1
+                elif enemy.direction == "right":
+                    if player.rect.x - enemy.rect.right < 80 and enemy.rect.y == 440:
+                        enemy.spritetype = "run"
+                    else:
+                        enemy.spritetype = "walk"
+                    if enemy.spritetype != "stand":
+                        if enemy.xacc < enemy.speed:
+                            enemy.xacc += 1
+                    else:
+                        if enemy.xacc > 0:
+                            enemy.xacc -= 1
+
+                if enemy.rect.colliderect(player.rect):
+                    if not enemy.attack:
+                        if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
+                            pass
+                        elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
+                            pass
                         else:
-                            if player.rect.x > -2442:
-                                player.rect.x -= 20
-                enemy.attack = True
-            else:
-                if enemy.spritetype == "run":
-                    enemy.rect.x += enemy.xacc
-                elif enemy.spritetype == "walk":
-                    enemy.rect.x += enemy.xacc/2
+                            enemy.animationvar = 0
+                            enemy.attackno = 3*128
+                            player.hitpoints -= enemy.attackpower
+                            if enemy.direction == "right":
+                                if player.rect.x < 3166:
+                                    player.rect.x += 30
+                            else:
+                                if player.rect.x > -2442:
+                                    player.rect.x -= 30
+                    enemy.attack = True
+                else:
+                    if enemy.spritetype == "run":
+                        enemy.rect.x += enemy.xacc
+                    elif enemy.spritetype == "walk":
+                        enemy.rect.x += enemy.xacc/2
         for enemy in enemylist:
             if enemy.rect.x > 3166:
                 enemy.rect.x = 3166
@@ -859,6 +892,12 @@ def level2():
         player.hpcolor = [220 - player.hitpoints*2, player.hitpoints*2 - 20, 0]
         pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
         writetext((30, 120), f"Kills remaining : {len(enemylist)}")
+        for enemy in enemylist:
+            if not enemy.rect.colliderect(displayrect):
+                if enemy.rect.x > displayrect.right:
+                    pygame.draw.polygon(displaysurf, (255, 180, 0), ((760, 280), (760, 320), (780, 300)))
+                elif enemy.rect.right < displayrect.x:
+                    pygame.draw.polygon(displaysurf, (255, 180, 0), ((40, 280), (40, 320), (20, 300)))
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         if len(enemylist) == 0:
             running = False
@@ -905,9 +944,9 @@ def menuloop():
                         if level == 1:
                             screen_fade()
                             level1()
-                        # if level == 2:
-                        #     screen_fade()
-                        #     level2()
+                        if level == 2:
+                            screen_fade()
+                            level2()
                     elif i == 1:
                         #settings
                         pass
