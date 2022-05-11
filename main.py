@@ -26,7 +26,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 0
+level = 2
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -285,7 +285,7 @@ bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, 
 [489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
 
 def level0():
-    for i in range(0, 2):
+    for i in range(0, 3):
         speech(i)
     global level, chunks
     chunks = []
@@ -334,7 +334,7 @@ def level0():
                     instruct = 2
                     spoke = False
             if instruct == 2:
-                if keys_pressed[K_LSHIFT]:
+                if keys_pressed[K_LSHIFT] and (keys_pressed[K_a] or keys_pressed[K_d]):
                     pressed[3] = True
                 elif pressed[3]:
                     instruct = 3
@@ -424,7 +424,7 @@ def level0():
         elif instruct == 1:
                 writetext((120, 560), "Press W to jump.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 2:
-                writetext((120, 560), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255), fontsize=24)
+                writetext((10, 560), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 3:
                 writetext((120, 560), "Press the space bar to unleash your power.", txtcolor=(255, 255, 255), fontsize=24)
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
@@ -677,7 +677,7 @@ def level1():
 
 def level2():
     global level, chunks
-    for i in range(7, 9):
+    for i in range(7, 10):
         speech(i)
     chunks = []
     for i in range(-5600, 6200, 800):
@@ -756,7 +756,7 @@ def level2():
                     print(scrollx)
                 
         if keys_pressed[K_a]:
-            if player.rect.x > -2442:
+            if player.rect.x < 5560:
                 player.spritetype = "walk"
                 player.direction = "left"
                 if player.xacc > -10:
@@ -765,7 +765,7 @@ def level2():
                 player.spritetype = "stand"
                 player.xacc = 0
         elif keys_pressed[K_d]:
-            if player.rect.x < 3166:
+            if player.rect.x > -4840:
                 player.spritetype = "walk"
                 player.direction = "right"
                 if player.xacc < 10:
