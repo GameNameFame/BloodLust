@@ -420,13 +420,13 @@ def level0():
         displaysurf.fill((255, 60, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         if instruct == 0:
-                writetext((10, 460), "Press A to go left, D to go right.", txtcolor=(255, 255, 255))
+                writetext((120, 560), "Press A to go left, D to go right.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 1:
-                writetext((10, 460), "Press W to jump.", txtcolor=(255, 255, 255))
+                writetext((120, 560), "Press W to jump.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 2:
-                writetext((10, 460), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255))
+                writetext((120, 560), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 3:
-                writetext((10, 460), "Press the space bar to unleash your power.", txtcolor=(255, 255, 255))
+                writetext((120, 560), "Press the space bar to unleash your power.", txtcolor=(255, 255, 255), fontsize=24)
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
         for enemy in enemylist:
