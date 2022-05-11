@@ -26,7 +26,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 2
+level = 1
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -862,10 +862,10 @@ def level2():
                             enemy.attackno = 3*128
                             player.hitpoints -= enemy.attackpower
                             if enemy.direction == "right":
-                                if player.rect.x < 3166:
+                                if player.rect.x < 5560:
                                     player.rect.x += 30
                             else:
-                                if player.rect.x > -2442:
+                                if player.rect.x > -4840:
                                     player.rect.x -= 30
                     enemy.attack = True
                 else:
