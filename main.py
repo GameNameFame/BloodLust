@@ -591,10 +591,11 @@ def level1():
         for enemy in enemylist:
             if enemy.rect.colliderect(displayrect):
                 if enemy.direction == "left":
-                    if enemy.rect.x - player.rect.right < 80 and enemy.rect.y == 440:
-                        enemy.spritetype = "run"
-                    else:
-                        enemy.spritetype = "walk"
+                    if enemy.rect.y == 440:
+                        if enemy.rect.x - player.rect.right < 80:
+                            enemy.spritetype = "run"
+                        else:
+                            enemy.spritetype = "walk"
                     if enemy.spritetype != "stand":
                         if enemy.xacc > -enemy.speed:
                             enemy.xacc -= 1
@@ -756,7 +757,7 @@ def level2():
                     print(scrollx)
                 
         if keys_pressed[K_a]:
-            if player.rect.x < 5560:
+            if player.rect.x > -4840:
                 player.spritetype = "walk"
                 player.direction = "left"
                 if player.xacc > -10:
@@ -765,7 +766,7 @@ def level2():
                 player.spritetype = "stand"
                 player.xacc = 0
         elif keys_pressed[K_d]:
-            if player.rect.x > -4840:
+            if player.rect.x < 5560:
                 player.spritetype = "walk"
                 player.direction = "right"
                 if player.xacc < 10:
@@ -790,7 +791,7 @@ def level2():
                 player.grav = -12
             if player.attackno == 3*128:
                 for enemy in enemylist:
-                    if player.rect.colliderect(enemy.rect):
+                    if player.rect.colliderect(enemy.rect) and player.animationvar > 4:
                         enemy.hitpoints -= player.attackpower
                         enemy.grav = -6
                         if player.direction == "right":
@@ -827,10 +828,11 @@ def level2():
         for enemy in enemylist:
             if enemy.rect.colliderect(displayrect):
                 if enemy.direction == "left":
-                    if enemy.rect.x - player.rect.right < 80 and enemy.rect.y == 440:
-                        enemy.spritetype = "run"
-                    else:
-                        enemy.spritetype = "walk"
+                    if enemy.rect.y == 440:
+                        if enemy.rect.x - player.rect.right < 80:
+                            enemy.spritetype = "run"
+                        else:
+                            enemy.spritetype = "walk"
                     if enemy.spritetype != "stand":
                         if enemy.xacc > -enemy.speed:
                             enemy.xacc -= 1
@@ -872,10 +874,10 @@ def level2():
                     elif enemy.spritetype == "walk":
                         enemy.rect.x += enemy.xacc/2
         for enemy in enemylist:
-            if enemy.rect.x > 3166:
-                enemy.rect.x = 3166
-            if enemy.rect.x < -2442:
-                enemy.rect.x = -2442
+            if enemy.rect.x > 5560:
+                enemy.rect.x = 5560
+            if enemy.rect.x < -4840:
+                enemy.rect.x = -4840
         displayrect.x = scrollx
 
         # display
