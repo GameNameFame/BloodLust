@@ -74,7 +74,7 @@ def speech(index):
         while speaking:
             pygame.display.flip(); clock.tick(30)
             displaysurf.fill((80, 10, 10))
-            writetext((10, 480), text[index], txtcolor=(255, 100, 100))
+            writetext((10, 400), text[index], txtcolor=(255, 100, 100))
             writetext((260, 560), "[Press SPACE or ENTER to proceed]", fontsize=14, txtcolor=(255, 255, 255))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             for ev in pygame.event.get():
