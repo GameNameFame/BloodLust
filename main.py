@@ -26,7 +26,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 1
+level = 0
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -796,8 +796,12 @@ def level2():
                         enemy.grav = -6
                         if player.direction == "right":
                             enemy.rect.x += 60
+                            if keys_pressed[K_LSHIFT]:
+                                enemy.rect.x += 60
                         else:
                             enemy.rect.x -= 60
+                            if keys_pressed[K_LSHIFT]:
+                                enemy.rect.x -= 60
             
         player.rect.y += player.grav
         for enemy in enemylist:
