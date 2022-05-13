@@ -26,7 +26,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 0
+level = 1
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -591,11 +591,10 @@ def level1():
         for enemy in enemylist:
             if enemy.rect.colliderect(displayrect):
                 if enemy.direction == "left":
-                    if enemy.rect.y == 440:
-                        if enemy.rect.x - player.rect.right < 80:
-                            enemy.spritetype = "run"
-                        else:
-                            enemy.spritetype = "walk"
+                    if enemy.rect.x - player.rect.right < 80 and enemy.rect.y == 440:
+                        enemy.spritetype = "run"
+                    else:
+                        enemy.spritetype = "walk"
                     if enemy.spritetype != "stand":
                         if enemy.xacc > -enemy.speed:
                             enemy.xacc -= 1
