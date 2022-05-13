@@ -831,11 +831,10 @@ def level2():
         for enemy in enemylist:
             if enemy.rect.colliderect(displayrect):
                 if enemy.direction == "left":
-                    if enemy.rect.y == 440:
-                        if enemy.rect.x - player.rect.right < 80:
-                            enemy.spritetype = "run"
-                        else:
-                            enemy.spritetype = "walk"
+                    if enemy.rect.x - player.rect.right < 80 and enemy.rect.y == 440:
+                        enemy.spritetype = "run"
+                    else:
+                        enemy.spritetype = "walk"
                     if enemy.spritetype != "stand":
                         if enemy.xacc > -enemy.speed:
                             enemy.xacc -= 1
