@@ -18,6 +18,9 @@ pygame.init()
 clock = pygame.time.Clock()
 sw, sh = pygame.display.Info().current_w, pygame.display.Info().current_h
 
+pygame.display.set_caption("Bloodlust : Rise of the greatest assassin")
+pygame.display.set_icon("logo.png")
+
 screen = pygame.display.set_mode((sw, sh), FULLSCREEN)
 displaysurf = pygame.Surface((800, 600))
 displayrect = Rect(0, 0, 800, 600)
@@ -25,7 +28,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 1
+level = 2
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -114,7 +117,7 @@ class Player(Character):
         self.attackno = 256
         self.swordparticles = []
         self.hitpoints = 100
-        self.attackpower = 20
+        self.attackpower = 10
         self.hpcolor = [0, 255, 0]
     def display(self, scrollx):
         if self.direction == "right":
@@ -286,12 +289,20 @@ bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, 
 [489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
 
 def combat_scene(enemylist, chunks):
+    global level
+    if level == 1:
+        llimit = -2442
+        rlimit = 3166
+    elif level == 2:
+        llimit = -4842
+        rlimit = 5566
     player.rect.x = 0
     player.hitpoint = 100
     player.direction = "right"
     running = True
     scrollx = 0
     bganim = 0
+    mixer.music.play(-1)
     while running:
         keys_pressed = pygame.key.get_pressed()
 
@@ -341,6 +352,7 @@ def combat_scene(enemylist, chunks):
             if ev.type == KEYDOWN:
                 if ev.key == K_ESCAPE:
                     # pause the game
+                    mixer.music.stop()
                     running = False
                 if ev.key == K_SPACE:
                     player.attack = True 
@@ -355,7 +367,7 @@ def combat_scene(enemylist, chunks):
                     print(scrollx)
                 
         if keys_pressed[K_a]:
-            if player.rect.x > -2442:
+            if player.rect.x > llimit:
                 player.spritetype = "walk"
                 player.direction = "left"
                 if player.xacc > -10:
@@ -364,7 +376,7 @@ def combat_scene(enemylist, chunks):
                 player.spritetype = "stand"
                 player.xacc = 0
         elif keys_pressed[K_d]:
-            if player.rect.x < 3166:
+            if player.rect.x < rlimit:
                 player.spritetype = "walk"
                 player.direction = "right"
                 if player.xacc < 10:
@@ -461,10 +473,10 @@ def combat_scene(enemylist, chunks):
                             enemy.attackno = 3*128
                             player.hitpoints -= enemy.attackpower
                             if enemy.direction == "right":
-                                if player.rect.x < 3166:
+                                if player.rect.x < rlimit:
                                     player.rect.x += 30
                             else:
-                                if player.rect.x > -2442:
+                                if player.rect.x > llimit:
                                     player.rect.x -= 30
                     enemy.attack = True
                 else:
@@ -472,11 +484,12 @@ def combat_scene(enemylist, chunks):
                         enemy.rect.x += enemy.xacc
                     elif enemy.spritetype == "walk":
                         enemy.rect.x += enemy.xacc/2
+        
         for enemy in enemylist:
-            if enemy.rect.x > 3166:
-                enemy.rect.x = 3166
-            if enemy.rect.x < -2442:
-                enemy.rect.x = -2442
+            if enemy.rect.x > rlimit:
+                enemy.rect.x = rlimit
+            if enemy.rect.x < llimit:
+                enemy.rect.x = llimit
         displayrect.x = scrollx
 
         # display
@@ -671,8 +684,7 @@ def level0():
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 def level1():
-    mixer.music.play(-1)
-    global level, chunks
+    global chunks
     chunks = []
     for i in range(-3200, 4000, 800):
         if i == -3200 or i == 3200:
@@ -684,7 +696,7 @@ def level1():
     combat_scene(enemylist, chunks)
 
 def level2():
-    global level, chunks
+    global chunks
     for i in range(7, 10):
         speech(i)
     chunks = []
@@ -714,6 +726,7 @@ def screen_fade():
 
 def menuloop():
     running = True
+    global level
     while running:
         pygame.display.flip(); clock.tick(30)
         for ev in pygame.event.get():
