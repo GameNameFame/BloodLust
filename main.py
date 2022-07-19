@@ -28,7 +28,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 0
+level = 1
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -112,6 +112,7 @@ class Player(Character):
         self.animationvar = 0
         self.spritetype = "stand"
         self.direction = "right"
+        self.facedir = "right"
         self.attack = False
         self.attackcoords = [(0, 0), (0, 0), (-2, 1), (0, -20), (10, -70), (40, -65), (50, -30), (30, 40)]
         self.attackno = 256
@@ -120,7 +121,7 @@ class Player(Character):
         self.attackpower = 10
         self.hpcolor = [0, 255, 0]
     def display(self, scrollx):
-        if self.direction == "right":
+        if self.facedir == "right":
             if self.attack:
                 if self.spritetype == "stand":
                     self.attackno = 3*128
@@ -381,10 +382,6 @@ def combat_scene(enemylist, chunks):
                     # pause the game
                     mixer.music.stop()
                     running = False
-                if ev.key == K_SPACE:
-                    player.attack = True 
-                    player.animationvar = 0
-                    player.attackno = 2*128
                 if ev.key == K_w:
                     if player.rect.bottom == 440:
                         player.grav = -18
@@ -392,6 +389,26 @@ def combat_scene(enemylist, chunks):
                     print(player.rect.x)
                 if ev.key == K_z:
                     print(scrollx)
+            if ev.type == MOUSEBUTTONDOWN:
+                if ev.button == 1:
+                    player.attack = True 
+                    player.animationvar = 0
+                    player.attackno = 2*128
+                if ev.button == 3:
+                    print("kick!")
+                    player.kick = True
+                    player.animationvar = 0
+                    player.attackno = 2*128
+                if ev.button == 4:
+                    print("fireball")
+                    player.magic = True
+                    player.animationvar = 0
+                    player.attackno = 2*128
+                if ev.button == 5:
+                    print("shuriken")
+                    player.throw = True
+                    player.animationvar = 0
+                    player.attackno = 2*128
                 
         if keys_pressed[K_a]:
             if player.rect.x > llimit:
@@ -417,6 +434,12 @@ def combat_scene(enemylist, chunks):
                 player.xacc += 1
             elif player.xacc > 0:
                 player.xacc -= 1
+
+        playerfacedir = mouse.get_rel()
+        if playerfacedir[0] < 0:
+            player.facedir = "left"
+        elif playerfacedir[0] > 0:
+            player.facedir = "right"
 
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
