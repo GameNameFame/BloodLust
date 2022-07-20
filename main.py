@@ -330,7 +330,8 @@ def combat_scene(enemylist, chunks):
     running = True
     scrollx = 0
     bganim = 0
-    mixer.music.play(-1)
+    pygame.mouse.set_visible(False)
+    # mixer.music.play(-1)
     while running:
         keys_pressed = pygame.key.get_pressed()
 
@@ -349,7 +350,10 @@ def combat_scene(enemylist, chunks):
 
         pygame.display.flip(); clock.tick(30)
 
-        scrollx += (player.rect.x - scrollx - 268)/20
+        if player.facedir == "right":
+            scrollx += (player.rect.x - scrollx - 268)/20
+        else:
+            scrollx += (player.rect.x - scrollx - 418)/20
 
         if len(bglines) < 60 and bganim > 7:
             bglines.append([[-103, 603], [-3, -3]])
@@ -575,6 +579,7 @@ def combat_scene(enemylist, chunks):
             running = False
             level += 1
             mixer.music.stop()
+    pygame.mouse.set_visible(True)
 
 def level0():
     for i in range(0, 3):
