@@ -114,6 +114,9 @@ class Player(Character):
         self.direction = "right"
         self.facedir = "right"
         self.attack = False
+        self.kick = False
+        self.throw = False
+        self.magic = False
         self.attackcoords = [(0, 0), (0, 0), (-2, 1), (0, -20), (10, -70), (40, -65), (50, -30), (30, 40)]
         self.attackno = 256
         self.swordparticles = []
@@ -123,57 +126,81 @@ class Player(Character):
     def display(self, scrollx):
         if self.facedir == "right":
             if self.attack:
-                if self.spritetype == "stand":
-                    self.attackno = 3*128
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
-                if self.attackno == 3*128:
-                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx + (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), (int(self.animationvar)*64, self.attackno + 128, self.rect.w, self.rect.h))
-                    if len(self.swordparticles) < 10:
-                        self.swordparticles.append(Particle(self.rect.x + self.animationvar*10, self.rect.y - (3.5 - self.animationvar)*4, -1, 0))
-                    for parts in self.swordparticles:
-                        parts.display(scrollx)
-                        if parts.size < 0:
-                            self.swordparticles.remove(parts)
-                if self.animationvar > 7.5 and self.attackno == 2*128:
-                    self.attackno = 3*128
-                    self.animationvar = 0
-                if self.animationvar > 7.5 and self.attackno == 3*128:
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx + (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), (int(self.animationvar)*64, self.attackno + 128, self.rect.w, self.rect.h))
+                if len(self.swordparticles) < 10:
+                    self.swordparticles.append(Particle(self.rect.x + self.animationvar*10, self.rect.y - (3.5 - self.animationvar)*4, -1, 0))
+                for parts in self.swordparticles:
+                    parts.display(scrollx)
+                    if parts.size < 0:
+                        self.swordparticles.remove(parts)
+                if self.animationvar > 7.5:
                     self.attack = False
+            elif self.kick:
+                writetext((80, 160), "Kick!")
+                if self.animationvar > 7.5:
+                    self.kick = False
+            elif self.throw:
+                writetext((80, 160), "Fireball!")
+                if self.animationvar > 7.5:
+                    self.throw = False
+            elif self.magic:
+                writetext((80, 160), "Shuriken!")
+                if self.animationvar > 7.5:
+                    self.magic = False
 
             elif not self.grav == 0:
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (64, 128, self.rect.w, self.rect.h))
             elif self.spritetype == "stand":
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (3*64, 0, self.rect.w, self.rect.h))
             elif self.spritetype == "walk":
-                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 0, self.rect.w, self.rect.h))
+                if player.direction == "right":
+                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 0, self.rect.w, self.rect.h))
+                else:
+                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), ((7 - int(self.animationvar))*64, 0, self.rect.w, self.rect.h))
             elif self.spritetype == "run":
-                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 128, self.rect.w, self.rect.h))
+                if player.direction == "right":
+                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 128, self.rect.w, self.rect.h))
+                else:
+                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), ((7 - int(self.animationvar))*64, 128, self.rect.w, self.rect.h))
         else:
             if self.attack:
-                if self.spritetype == "stand":
-                    self.attackno = 3*128
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
-                if self.attackno == 3*128:
-                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx - (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), ((int(self.animationvar) - 7) * -64, self.attackno + 128, self.rect.w, self.rect.h))
-                    if len(self.swordparticles) < 10:
-                        self.swordparticles.append(Particle(self.rect.right - self.animationvar*10, self.rect.y - (3.5 - self.animationvar)*4, 1, 0))
-                    for parts in self.swordparticles:
-                        parts.display(scrollx)
-                        if parts.size < 0:
-                            self.swordparticles.remove(parts)
-                if self.animationvar > 7.5 and self.attackno == 2*128:
-                    self.attackno = 3*128
-                    self.animationvar = 0
-                if self.animationvar > 7.5 and self.attackno == 3*128:
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx - (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), ((int(self.animationvar) - 7) * -64, self.attackno + 128, self.rect.w, self.rect.h))
+                if len(self.swordparticles) < 10:
+                    self.swordparticles.append(Particle(self.rect.right - self.animationvar*10, self.rect.y - (3.5 - self.animationvar)*4, 1, 0))
+                for parts in self.swordparticles:
+                    parts.display(scrollx)
+                    if parts.size < 0:
+                        self.swordparticles.remove(parts)
+                if self.animationvar > 7.5:
                     self.attack = False
+            elif self.kick:
+                writetext((80, 160), "Kick!")
+                if self.animationvar > 7.5:
+                    self.kick = False
+            elif self.throw:
+                writetext((80, 160), "Fireball!")
+                if self.animationvar > 7.5:
+                    self.throw = False
+            elif self.magic:
+                writetext((80, 160), "Shuriken!")
+                if self.animationvar > 7.5:
+                    self.magic = False
             elif not self.grav == 0:
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (7*64, 128, self.rect.w, self.rect.h))
             elif self.spritetype == "stand":
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (4*64, 0, self.rect.w, self.rect.h))
             elif self.spritetype == "walk":
-                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 0, self.rect.w, self.rect.h))
+                if self.direction == "left":
+                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 0, self.rect.w, self.rect.h))
+                else:
+                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar)*64), 0, self.rect.w, self.rect.h))
             elif self.spritetype == "run":
-                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
+                if self.direction == "left":
+                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
+                else:
+                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar)*64), 128, self.rect.w, self.rect.h))
 
 class Enemy(Character):
     def __init__(self, xpos):
@@ -195,15 +222,9 @@ class Enemy(Character):
     def display(self, scrollx):
         if self.direction == "right":
             if self.attack:
-                if self.spritetype == "stand":
-                    self.attackno = 3*128
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
-                if self.attackno == 3*128:
-                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx + (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), (int(self.animationvar)*64, self.attackno + 128, self.rect.w, self.rect.h))
-                if self.animationvar > 7.5 and self.attackno == 2*128:
-                    self.attackno = 3*128
-                    self.animationvar = 0
-                if self.animationvar > 7.5 and self.attackno == 3*128:
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx + (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), (int(self.animationvar)*64, self.attackno + 128, self.rect.w, self.rect.h))
+                if self.animationvar > 7.5:
                     self.attack = False
 
             elif not self.grav == 0:
@@ -216,15 +237,9 @@ class Enemy(Character):
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 128, self.rect.w, self.rect.h))
         else:
             if self.attack:
-                if self.spritetype == "stand":
-                    self.attackno = 3*128
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
-                if self.attackno == 3*128:
-                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx - (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), ((int(self.animationvar) - 7) * -64, self.attackno + 128, self.rect.w, self.rect.h))
-                if self.animationvar > 7.5 and self.attackno == 2*128:
-                    self.attackno = 3*128
-                    self.animationvar = 0
-                if self.animationvar > 7.5 and self.attackno == 3*128:
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx - (self.attackcoords[int(self.animationvar)][0]), self.rect.y + (self.attackcoords[int(self.animationvar)][1])), ((int(self.animationvar) - 7) * -64, self.attackno + 128, self.rect.w, self.rect.h))
+                if self.animationvar > 7.5:
                     self.attack = False
             elif not self.grav == 0:
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (7*64, 128, self.rect.w, self.rect.h))
@@ -353,7 +368,7 @@ def combat_scene(enemylist, chunks):
         if player.facedir == "right":
             scrollx += (player.rect.x - scrollx - 268)/20
         else:
-            scrollx += (player.rect.x - scrollx - 418)/20
+            scrollx += (player.rect.x - scrollx - 450)/20
 
         if len(bglines) < 60 and bganim > 7:
             bglines.append([[-103, 603], [-3, -3]])
@@ -397,22 +412,15 @@ def combat_scene(enemylist, chunks):
                 if ev.button == 1:
                     player.attack = True 
                     player.animationvar = 0
-                    player.attackno = 2*128
                 if ev.button == 3:
-                    print("kick!")
                     player.kick = True
                     player.animationvar = 0
-                    player.attackno = 2*128
                 if ev.button == 4:
-                    print("fireball")
                     player.magic = True
                     player.animationvar = 0
-                    player.attackno = 2*128
                 if ev.button == 5:
-                    print("shuriken")
                     player.throw = True
                     player.animationvar = 0
-                    player.attackno = 2*128
                 
         if keys_pressed[K_a]:
             if player.rect.x > llimit:
@@ -445,23 +453,25 @@ def combat_scene(enemylist, chunks):
         elif playerfacedir[0] > 0:
             player.facedir = "right"
 
-        if not keys_pressed[K_LSHIFT]:
-            player.rect.x += player.xacc/2
-        elif player.spritetype == "walk":
-            player.spritetype = "run"
-            player.rect.x += player.xacc
+        # if not keys_pressed[K_LSHIFT]:
+        #     player.rect.x += player.xacc/2
+        # elif player.spritetype == "walk":
+        #     player.spritetype = "run"
+        #     player.rect.x += player.xacc
+        player.rect.x += player.xacc/2
         if player.attack:
-            if player.attackno == 2*128 and player.animationvar > 7.5 and keys_pressed[K_LSHIFT]:
-                player.grav = -12
-            if player.attackno == 3*128:
-                for enemy in enemylist:
-                    if player.rect.colliderect(enemy.rect):
-                        enemy.hitpoints -= player.attackpower
-                        enemy.grav = -6
-                        if player.direction == "right":
-                            enemy.rect.x += 60
-                        else:
-                            enemy.rect.x -= 60
+            for enemy in enemylist:
+                if player.rect.colliderect(enemy.rect):
+                    if player.facedir == "right":
+                        if enemy.rect.x > player.rect.x:
+                            enemy.hitpoints -= player.attackpower
+                            enemy.grav = -6
+                        enemy.rect.x += 60
+                    else:
+                        if enemy.rect.right < player.rect.right:
+                            enemy.hitpoints -= player.attackpower
+                            enemy.grav = -6
+                        enemy.rect.x -= 60
             
         player.rect.y += player.grav
         for enemy in enemylist:
@@ -524,7 +534,6 @@ def combat_scene(enemylist, chunks):
                             pass
                         else:
                             enemy.animationvar = 0
-                            enemy.attackno = 3*128
                             player.hitpoints -= enemy.attackpower
                             if enemy.direction == "right":
                                 if player.rect.x < rlimit:
