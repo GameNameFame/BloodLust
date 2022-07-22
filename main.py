@@ -137,17 +137,21 @@ class Player(Character):
                 if self.animationvar > 7.5:
                     self.attack = False
             elif self.kick:
-                writetext((80, 160), "Kick!")
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     self.kick = False
             elif self.throw:
-                writetext((80, 160), "Fireball!")
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     self.throw = False
             elif self.magic:
-                writetext((80, 160), "Shuriken!")
+                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
-                    self.magic = False
+                    if self.attackno == 6*128:
+                        self.attackno = 7*128
+                        self.animationvar = 0
+                    else:
+                        self.magic = False
 
             elif not self.grav == 0:
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (64, 128, self.rect.w, self.rect.h))
@@ -176,17 +180,21 @@ class Player(Character):
                 if self.animationvar > 7.5:
                     self.attack = False
             elif self.kick:
-                writetext((80, 160), "Kick!")
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     self.kick = False
             elif self.throw:
-                writetext((80, 160), "Fireball!")
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     self.throw = False
             elif self.magic:
-                writetext((80, 160), "Shuriken!")
+                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
-                    self.magic = False
+                    if self.attackno == 6*128:
+                        self.attackno = 7*128
+                        self.animationvar = 0
+                    else:
+                        self.magic = False
             elif not self.grav == 0:
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (7*64, 128, self.rect.w, self.rect.h))
             elif self.spritetype == "stand":
@@ -411,19 +419,23 @@ def combat_scene(enemylist, chunks):
             if ev.type == MOUSEBUTTONDOWN:
                 if ev.button == 1:
                     player.attack = True 
+                    player.attackno = 2*128
                     player.animationvar = 0
                 if ev.button == 3:
                     player.kick = True
+                    player.attackno = 4*128
                     player.animationvar = 0
                 if ev.button == 4:
                     player.magic = True
+                    player.attackno = 6*128
                     player.animationvar = 0
                 if ev.button == 5:
                     player.throw = True
+                    player.attackno = 5*128
                     player.animationvar = 0
                 
         if keys_pressed[K_a]:
-            if player.rect.x > llimit:
+            if player.rect.x > llimit and not player.throw and not player.magic:
                 player.spritetype = "walk"
                 player.direction = "left"
                 if player.xacc > -10:
@@ -432,7 +444,7 @@ def combat_scene(enemylist, chunks):
                 player.spritetype = "stand"
                 player.xacc = 0
         elif keys_pressed[K_d]:
-            if player.rect.x < rlimit:
+            if player.rect.x < rlimit and not player.throw and not player.magic:
                 player.spritetype = "walk"
                 player.direction = "right"
                 if player.xacc < 10:
@@ -472,6 +484,19 @@ def combat_scene(enemylist, chunks):
                             enemy.hitpoints -= player.attackpower
                             enemy.grav = -6
                         enemy.rect.x -= 60
+        if player.kick:
+            for enemy in enemylist:
+                if player.rect.colliderect(enemy.rect):
+                    if player.facedir == "right":
+                        if enemy.rect.x > player.rect.x:
+                            enemy.hitpoints -= player.attackpower/2
+                            enemy.grav = -3
+                        enemy.rect.x += 120
+                    else:
+                        if enemy.rect.right < player.rect.right:
+                            enemy.hitpoints -= player.attackpower/2
+                            enemy.grav = -3
+                        enemy.rect.x -= 120
             
         player.rect.y += player.grav
         for enemy in enemylist:
