@@ -122,7 +122,7 @@ class Throwable:
     def display(self, scrollx):
         self.dist += self.speed
         self.rect.x = player.rect.right + self.dist
-        pygame.draw.circle(displaysurf, (0, 0, 0), (self.rect.centerx - scrollx, self.rect.centery), 6)
+        pygame.draw.circle(displaysurf, (100, 100, 140), (self.rect.centerx - scrollx, self.rect.centery), 6)
 class Magic:
     def __init__(self):
         self.rect = Rect(-30, -30, 24, 24)
@@ -411,6 +411,7 @@ def combat_scene(enemylist, chunks):
     pygame.mouse.set_visible(False)
     mixer.music.play(-1)
     while running:
+        pygame.mouse.set_pos((400, 300))
         keys_pressed = pygame.key.get_pressed()
 
         player.animationvar += 0.4
@@ -536,12 +537,10 @@ def combat_scene(enemylist, chunks):
                     if player.facedir == "right":
                         if enemy.rect.x > player.rect.x:
                             enemy.hitpoints -= player.attackpower
-                            enemy.grav = -6
                         enemy.rect.x += 60
                     else:
                         if enemy.rect.right < player.rect.right:
                             enemy.hitpoints -= player.attackpower
-                            enemy.grav = -6
                         enemy.rect.x -= 60
         if player.kick:
             for enemy in enemylist:
@@ -825,7 +824,7 @@ def level0():
                         player.attackno = 6*128
                         player.animationvar = 0
                         mouse_pressed_4 = True
-                        countdown = 1000
+                        countdown = 300
                 if ev.button == 5:
                     if instruct > 4:
                         player.throw = True
@@ -982,6 +981,7 @@ def menuloop():
                         if level == 2:
                             screen_fade()
                             level2()
+                            level = 0
                     elif i == 1:
                         #settings
                         pass
