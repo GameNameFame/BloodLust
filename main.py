@@ -28,7 +28,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("wad.png")
 
 speaking = False
-level = 1
+level = 0
 guibool = True
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
@@ -42,9 +42,9 @@ class Particle:
         self.position[0] += self.direction[0]
         self.position[1] += self.direction[1]
 
-def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='freesansbold'):
-    fontttf += '.ttf'
-    font = pygame.font.Font(fontttf, fontsize)
+def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='Arial'):
+    # fontttf += '.ttf'
+    font = pygame.font.SysFont(fontttf, fontsize)
     txt = font.render(text, True, txtcolor, txtbgcolor)
     displaysurf.blit(txt, position)
 
@@ -104,6 +104,55 @@ class Character:
         self.xacc = 0
         self.hitpoints = 100
 
+class Throwable:
+    def __init__(self):
+        self.rect = Rect(-30, -30, 12, 12)
+        self.dist = 0
+        self.speed = 0
+        self.damage = 20
+    def throw(self, player):
+        self.dist = 0
+        if player.facedir == "right":
+            self.rect.x = player.rect.right
+            self.speed = 10
+        else:
+            self.rect.right = player.rect.left
+            self.speed = -10
+        self.rect.y = player.rect.centery
+    def display(self, scrollx):
+        self.dist += self.speed
+        self.rect.x = player.rect.right + self.dist
+        pygame.draw.circle(displaysurf, (0, 0, 0), (self.rect.centerx - scrollx, self.rect.centery), 6)
+class Magic:
+    def __init__(self):
+        self.rect = Rect(-30, -30, 24, 24)
+        self.dist = 0
+        self.speed = 0
+        self.damage = 25
+        self.trailparticles = []
+    def throw(self, player):
+        self.dist = 0
+        if player.facedir == "right":
+            self.rect.x = player.rect.right
+            self.speed = 10
+        else:
+            self.rect.right = player.rect.left
+            self.speed = -10
+        self.rect.y = player.rect.centery
+    def display(self, scrollx):
+        self.dist += self.speed
+        self.rect.x = player.rect.right + self.dist
+        if len(self.trailparticles) < 10:
+            self.trailparticles.append(Particle(self.rect.centerx, self.rect.centery, self.speed/10, 0))
+        for parts in self.trailparticles:
+            parts.display(scrollx)
+            if parts.size < 0:
+                self.trailparticles.remove(parts)
+        pygame.draw.circle(displaysurf, (255, 255, 0), (self.rect.centerx - scrollx, self.rect.centery), 12)
+
+shuriken = Throwable()
+fireball = Magic()
+
 class Player(Character):
     def __init__(self):
         super().__init__()
@@ -144,12 +193,14 @@ class Player(Character):
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     self.throw = False
+                    shuriken.throw(self)
             elif self.magic:
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     if self.attackno == 6*128:
                         self.attackno = 7*128
                         self.animationvar = 0
+                        fireball.throw(self)
                     else:
                         self.magic = False
 
@@ -187,12 +238,14 @@ class Player(Character):
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     self.throw = False
+                    shuriken.throw(self)
             elif self.magic:
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar) - 7) * -64, self.attackno, self.rect.w, self.rect.h))
                 if self.animationvar > 7.5:
                     if self.attackno == 6*128:
                         self.attackno = 7*128
                         self.animationvar = 0
+                        fireball.throw(self)
                     else:
                         self.magic = False
             elif not self.grav == 0:
@@ -209,6 +262,8 @@ class Player(Character):
                     displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
                 else:
                     displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar)*64), 128, self.rect.w, self.rect.h))
+        shuriken.display(scrollx)
+        fireball.display(scrollx)
 
 class Enemy(Character):
     def __init__(self, xpos):
@@ -354,7 +409,7 @@ def combat_scene(enemylist, chunks):
     scrollx = 0
     bganim = 0
     pygame.mouse.set_visible(False)
-    # mixer.music.play(-1)
+    mixer.music.play(-1)
     while running:
         keys_pressed = pygame.key.get_pressed()
 
@@ -465,12 +520,16 @@ def combat_scene(enemylist, chunks):
         elif playerfacedir[0] > 0:
             player.facedir = "right"
 
-        # if not keys_pressed[K_LSHIFT]:
-        #     player.rect.x += player.xacc/2
-        # elif player.spritetype == "walk":
-        #     player.spritetype = "run"
-        #     player.rect.x += player.xacc
-        player.rect.x += player.xacc/2
+        if not keys_pressed[K_LSHIFT]:
+            player.rect.x += player.xacc/2
+        elif player.spritetype == "walk":
+            if player.direction == player.facedir:
+                player.spritetype = "run"
+                player.rect.x += player.xacc
+            else:
+                player.rect.x += player.xacc/2
+        # player.rect.x += player.xacc/2
+
         if player.attack:
             for enemy in enemylist:
                 if player.rect.colliderect(enemy.rect):
@@ -563,15 +622,33 @@ def combat_scene(enemylist, chunks):
                             if enemy.direction == "right":
                                 if player.rect.x < rlimit:
                                     player.rect.x += 30
+                                    player.grav = -3
                             else:
                                 if player.rect.x > llimit:
                                     player.rect.x -= 30
+                                    player.grav = -3
                     enemy.attack = True
                 else:
                     if enemy.spritetype == "run":
                         enemy.rect.x += enemy.xacc
                     elif enemy.spritetype == "walk":
                         enemy.rect.x += enemy.xacc/2
+                if enemy.rect.colliderect(shuriken.rect):
+                    if shuriken.speed > 0:
+                        enemy.rect.x += 50
+                    elif shuriken.speed < 0:
+                        enemy.rect.x -= 50
+                    shuriken.speed = 0; shuriken.dist = 0
+                    shuriken.rect.x = shuriken.rect.y = -30
+                    enemy.hitpoints -= shuriken.damage
+                if enemy.rect.colliderect(fireball.rect):
+                    if fireball.speed > 0:
+                        enemy.rect.x += 100
+                    elif fireball.speed < 0:
+                        enemy.rect.x -= 100
+                    fireball.speed = 0; fireball.dist = 0
+                    fireball.rect.x = fireball.rect.y = -30
+                    enemy.hitpoints -= fireball.damage
         
         for enemy in enemylist:
             if enemy.rect.x > rlimit:
@@ -600,7 +677,11 @@ def combat_scene(enemylist, chunks):
                 enemylist.remove(enemy)
         pygame.draw.rect(displaysurf, (0, 0, 0), (28, 58, 204, 34))
         player.hpcolor = [220 - player.hitpoints*2, player.hitpoints*2 - 20, 0]
-        pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
+        try:
+            pygame.draw.rect(displaysurf, player.hpcolor, (30, 60, player.hitpoints*2, 30))
+        except ValueError:
+            mixer.music.stop()
+            running = False
         writetext((30, 120), f"Kills remaining : {len(enemylist)}")
         for enemy in enemylist:
             if not enemy.rect.colliderect(displayrect):
@@ -626,9 +707,13 @@ def level0():
     instruct = 0
     countdown = -1
     spoke = False
-    pressed = [False, False, False, False]
+    pressed = [False, False, False, False, False, False, False, False]
     scrollx = 0
+    mouse_pressed_3 = False
+    mouse_pressed_4 = False
     while running:
+        player.facedir = player.direction
+        mouse_pressed = pygame.mouse.get_pressed()
         keys_pressed = pygame.key.get_pressed()
         player.animationvar += 0.4
         if player.animationvar > 8:
@@ -644,12 +729,21 @@ def level0():
                     engine.say("Press the left shift button while moving left or right to sprint.")
                     engine.runAndWait()
                 elif instruct == 3:
-                    engine.say("Press the space bar to unleash your power.")
+                    engine.say("Press the Left Mouse button to unleash your sword's power.")
                     engine.runAndWait()
-                if instruct < 4:
+                elif instruct == 4:
+                    engine.say("Press the Right Mouse button to kick.")
+                    engine.runAndWait()
+                elif instruct == 5:
+                    engine.say("Scroll down to throw a ranged weapon.")
+                    engine.runAndWait()
+                elif instruct == 6:
+                    engine.say("Scroll up to use magic.")
+                    engine.runAndWait()
+                if instruct < 7:
                     spoke = True
 
-        if instruct < 4:
+        if instruct < 7:
             if instruct == 0:
                 if keys_pressed[K_a]:
                     pressed[0] = True
@@ -671,8 +765,31 @@ def level0():
                     instruct = 3
                     spoke = False
             if instruct == 3:
-                if keys_pressed[K_SPACE]:
+                if mouse_pressed[0]:
+                    pressed[4] = True
+                elif pressed[4]:
                     instruct = 4
+                    spoke = False
+            if instruct == 4:
+                if mouse_pressed[2]:
+                    pressed[5] = True
+                elif pressed[5]:
+                    instruct = 5
+                    spoke = False
+            if instruct == 5:
+                if mouse_pressed_3 and (shuriken.rect.x < 0 or shuriken.rect.right > 800):
+                    mouse_pressed_3 = False
+                    pressed[6] = True
+                elif pressed[6]:
+                    instruct = 6
+                    spoke = False
+            if instruct == 6:
+                if mouse_pressed_4:
+                    mouse_pressed_4 = False
+                    pressed[7] = True
+                elif pressed[7]:
+                    instruct = 7
+                    spoke = False
 
         pygame.display.flip(); clock.tick(30)
         if countdown > 0:
@@ -687,20 +804,38 @@ def level0():
                 running = False
                 pygame.quit()
                 sys.exit()
-            if ev.type == KEYDOWN:
-                if ev.key == K_ESCAPE:
-                    # pause the game
-                    running = False
-                if ev.key == K_SPACE:
-                    if not firsthit and instruct == 3:
+            if ev.type == MOUSEBUTTONDOWN:
+                if ev.button == 1:
+                    if not firsthit and instruct == 2:
                         firsthit = True
                         speech(3)
                         speech(4)
-                        countdown = 1000
                     if instruct > 2:
                         player.attack = True 
                         player.animationvar = 0
                         player.attackno = 2*128
+                if ev.button == 3:
+                    if instruct > 3:
+                        player.kick = True
+                        player.attackno = 4*128
+                        player.animationvar = 0
+                if ev.button == 4:
+                    if instruct > 5:
+                        player.magic = True
+                        player.attackno = 6*128
+                        player.animationvar = 0
+                        mouse_pressed_4 = True
+                        countdown = 1000
+                if ev.button == 5:
+                    if instruct > 4:
+                        player.throw = True
+                        player.attackno = 5*128
+                        player.animationvar = 0
+                        mouse_pressed_3 = True
+            if ev.type == KEYDOWN:
+                if ev.key == K_ESCAPE:
+                    # pause the game
+                    running = False
                 if ev.key == K_w:
                     if player.rect.bottom == 440 and instruct > 0:
                         player.grav = -18
@@ -742,22 +877,25 @@ def level0():
                 player.rect.x += player.xacc
             else:
                 player.rect.x += player.xacc/2
-        if player.attack:
-            if player.attackno == 2*128 and player.animationvar > 7.5:
-                player.grav = -12
         player.rect.y += player.grav
 
         # display
         displaysurf.fill((255, 60, 0))
         pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
         if instruct == 0:
-                writetext((120, 560), "Press A to go left, D to go right.", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((120, 560), "Press A to go left, D to go right.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 1:
-                writetext((120, 560), "Press W to jump.", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((120, 560), "Press W to jump.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 2:
-                writetext((10, 560), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((10, 560), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 3:
-                writetext((120, 560), "Press the space bar to unleash your power.", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((120, 560), "Press the Left Mouse button to unleash your sword's power.", txtcolor=(255, 255, 255), fontsize=24)
+        elif instruct == 4:
+            writetext((120, 560), "Press the Right Mouse button to kick.", txtcolor=(255, 255, 255), fontsize=24)
+        elif instruct == 5:
+            writetext((120, 560), "Scroll down to throw a ranged weapon.", txtcolor=(255, 255, 255), fontsize=24)
+        elif instruct == 6:
+            writetext((120, 560), "Scroll up to use magic (Fireball).", txtcolor=(255, 255, 255), fontsize=24)
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
         for enemy in enemylist:
