@@ -19,13 +19,13 @@ clock = pygame.time.Clock()
 sw, sh = pygame.display.Info().current_w, pygame.display.Info().current_h
 
 pygame.display.set_caption("Bloodlust : Rise of the greatest assassin")
-pygame.display.set_icon(pygame.image.load("logo.png"))
+pygame.display.set_icon(pygame.image.load("Assets/logo.png"))
 
 screen = pygame.display.set_mode((sw, sh), FULLSCREEN)
 displaysurf = pygame.Surface((800, 600))
 displayrect = Rect(0, 0, 800, 600)
 
-wadpic = pygame.image.load("wad.png")
+wadpic = pygame.image.load("Assets/wad.png")
 
 speaking = False
 level = 0
@@ -51,7 +51,7 @@ def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txt
 def speech(index):
     global speaking
     speaking = True
-    with open("dialogues.txt", 'r') as text:
+    with open("Assets/dialogues.txt", 'r') as text:
         text = text.read().split('\n')
     if index + 1 > len(text):
         pass
@@ -97,6 +97,46 @@ def speech(index):
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             j += 5
 
+def LoadScreen():
+    for l in range(2):
+        j = 248
+        fadebg = pygame.Surface((sw, sh))
+        fadebg.fill((0, 0, 0))
+        while j > 0:
+            pygame.display.flip(); clock.tick(30)
+            for ev in pygame.event.get():
+                if ev.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+            screen.fill((255, 255, 255))
+            fadebg.set_alpha(j)
+            screen.blit(fadebg, (0, 0))
+            j -= 8
+        for i in range(40):
+            pygame.display.flip(); clock.tick(30)
+            for ev in pygame.event.get():
+                if ev.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+            screen.fill((255, 255, 255))
+        while j < 248:
+            pygame.display.flip(); clock.tick(30)
+            for ev in pygame.event.get():
+                if ev.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+            screen.fill((255, 255, 255))
+            fadebg.set_alpha(j)
+            screen.blit(fadebg, (0, 0))
+            j += 8
+        for i in range(20):
+            pygame.display.flip(); clock.tick(30)
+            for ev in pygame.event.get():
+                if ev.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+            screen.fill((0, 0, 0))
+
 class Character:
     def __init__(self):
         self.rect = Rect(0, 0, 64, 128)
@@ -122,7 +162,7 @@ class Throwable:
     def display(self, scrollx):
         self.dist += self.speed
         self.rect.x = player.rect.right + self.dist
-        pygame.draw.circle(displaysurf, (100, 100, 140), (self.rect.centerx - scrollx, self.rect.centery), 6)
+        pygame.draw.circle(displaysurf, (100, 100, 120), (self.rect.centerx - scrollx, self.rect.centery), 6)
 class Magic:
     def __init__(self):
         self.rect = Rect(-30, -30, 24, 24)
@@ -157,7 +197,7 @@ class Player(Character):
     def __init__(self):
         super().__init__()
         self.rect.bottom = 420
-        self.spritesheet = pygame.image.load("stickman_spritesheet.png")
+        self.spritesheet = pygame.image.load("Assets/stickman_spritesheet.png")
         self.animationvar = 0
         self.spritetype = "stand"
         self.direction = "right"
@@ -270,7 +310,7 @@ class Enemy(Character):
         super().__init__()
         self.rect.x = xpos
         self.rect.bottom = 440
-        self.spritesheet = pygame.image.load("enemy_spritesheet.png")
+        self.spritesheet = pygame.image.load("Assets/enemy_spritesheet.png")
         self.spritetype = "stand"
         self.direction = "right"
         self.attack = False
@@ -316,12 +356,12 @@ class Enemy(Character):
 player = Player()
 enemylist = []
 
-mixer.music.load("fight_bgm.wav")
+mixer.music.load("Assets/fight_bgm.wav")
 
-treeimg = pygame.image.load("tree.png")
-bushimg = pygame.image.load("bush.png")
-grassimg = pygame.image.load("grass.png")
-fenceimg = pygame.image.load("fence.png")
+treeimg = pygame.image.load("Assets/tree.png")
+bushimg = pygame.image.load("Assets/bush.png")
+grassimg = pygame.image.load("Assets/grass.png")
+fenceimg = pygame.image.load("Assets/fence.png")
 
 def createChunk(xpos):
     global chunks
@@ -894,7 +934,7 @@ def level0():
         elif instruct == 5:
             writetext((120, 560), "Scroll down to throw a ranged weapon.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 6:
-            writetext((120, 560), "Scroll up to use magic (Fireball).", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((120, 560), "Scroll up to use magic.", txtcolor=(255, 255, 255), fontsize=24)
         pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
         player.display(scrollx)
         for enemy in enemylist:
@@ -999,4 +1039,5 @@ def menuloop():
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 if __name__ == "__main__":
+    LoadScreen()
     menuloop()
