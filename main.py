@@ -32,6 +32,9 @@ title_bg = pygame.image.load("Assets/title_bg.png")
 speaking = False
 level = 0
 guibool = True
+narration_bool = True
+peek_bool = True
+
 class Particle:
     def __init__(self, posx, posy, dirx, diry):
         self.size = 3
@@ -73,8 +76,9 @@ def speech(index):
             displaysurf.blit(fadebg, (0, 0))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             j -= 20
-        engine.say(text[index])
-        engine.runAndWait()
+        if narration_bool:
+            engine.say(text[index])
+            engine.runAndWait()
         while speaking:
             pygame.display.flip(); clock.tick(30)
             displaysurf.fill((80, 10, 10))
@@ -154,7 +158,7 @@ def LoadScreen():
                     pygame.quit()
                     sys.exit()
             screen.fill((0, 0, 0))
-    title_sound.fadeout(1200)
+    title_sound.fadeout(3000)
     pygame.mouse.set_visible(True)
 
 class Character:
@@ -771,6 +775,8 @@ def level0():
     mouse_pressed_3 = False
     mouse_pressed_4 = False
     while running:
+        if not narration_bool:
+            spoke = True
         player.facedir = player.direction
         mouse_pressed = pygame.mouse.get_pressed()
         keys_pressed = pygame.key.get_pressed()
@@ -1011,9 +1017,66 @@ def screen_fade():
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         j += 5
 
+def settingsloop():
+    running = True
+    global narration_bool, peek_bool
+    rect1color = (0, 255, 100)
+    rect2color = (0, 255, 100)
+    rect1 = Rect(400, 200, 120, 40)
+    rect2 = Rect(400, 300, 120, 40)
+    while running:
+        pygame.display.flip(); clock.tick(30)
+        if narration_bool:
+            rect1color = (0, 255, 100)
+        else:
+            rect1color = (255, 0, 0)
+        if peek_bool:
+            rect2color = (0, 255, 100)
+        else:
+            rect2color = (255, 0, 0)
+        for ev in pygame.event.get():
+            if ev.type == QUIT:
+                pygame.quit()
+                sys.exit()
+            if ev.type == KEYDOWN:
+                if ev.key == K_ESCAPE:
+                    running = False
+            if ev.type == MOUSEBUTTONDOWN:
+                if ev.button == 1:
+                    mouse_pos = pygame.mouse.get_pos()
+                    if rect1.collidepoint((mouse_pos[0]/sw*800, mouse_pos[1]/sh*600)):
+                        narration_bool = not narration_bool
+                    if rect2.collidepoint((mouse_pos[0]/sw*800, mouse_pos[1]/sh*600)):
+                        peek_bool = not peek_bool
+        displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
+        writetext((120, 200), "Narration: " + str(narration_bool), txtcolor=(255, 255, 255), fontsize=24)
+        writetext((120, 300), "Peek: " + str(peek_bool), txtcolor=(255, 255, 255), fontsize=24)
+        pygame.draw.rect(displaysurf, rect1color, rect1)
+        pygame.draw.rect(displaysurf, rect2color, rect2)
+        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+
 def menuloop():
     running = True
     global level
+    j = 254
+    fadebg = pygame.Surface((sw, sh))
+    fadebg.fill((0, 0, 0))
+    optcolors = [(100, 100, 0), (100, 100, 0), (100, 100, 0)]
+    while j > 0:
+        pygame.display.flip(); clock.tick(30)
+        for ev in pygame.event.get():
+            if ev.type == QUIT:
+                pygame.quit()
+                sys.exit()
+        displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
+        writetext((400 - 260, 100), "Bloodlust", txtcolor=(255, 30, 0), fontsize=140, fontttf="Assets/AnastasiaScript")
+        writetext((400 - 40, 320), "Start", txtcolor=optcolors[0])
+        writetext((400 - 60, 400), "Settings", txtcolor=optcolors[1])
+        writetext((400 - 35, 480), "Exit", txtcolor=optcolors[2])
+        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+        fadebg.set_alpha(j)
+        screen.blit(fadebg, (0, 0))
+        j -= 2
     while running:
         pygame.display.flip(); clock.tick(30)
         for ev in pygame.event.get():
@@ -1043,8 +1106,7 @@ def menuloop():
                             level2()
                             level = 0
                     elif i == 1:
-                        #settings
-                        pass
+                        settingsloop()
                     elif i == 2:
                         running = False
                         pygame.quit()
