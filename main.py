@@ -26,6 +26,8 @@ displaysurf = pygame.Surface((800, 600))
 displayrect = Rect(0, 0, 800, 600)
 
 wadpic = pygame.image.load("Assets/wad.png")
+title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
+title_bg = pygame.image.load("Assets/title_bg.png")
 
 speaking = False
 level = 0
@@ -42,9 +44,9 @@ class Particle:
         self.position[0] += self.direction[0]
         self.position[1] += self.direction[1]
 
-def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='Arial'):
-    # fontttf += '.ttf'
-    font = pygame.font.SysFont(fontttf, fontsize)
+def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='freesansbold'):
+    fontttf += '.ttf'
+    font = pygame.font.Font(fontttf, fontsize)
     txt = font.render(text, True, txtcolor, txtbgcolor)
     displaysurf.blit(txt, position)
 
@@ -98,8 +100,21 @@ def speech(index):
             j += 5
 
 def LoadScreen():
+    pygame.mouse.set_visible(False)
     for l in range(2):
-        j = 248
+        if l == 0:
+            bgimg = pygame.image.load("Assets/title_screen2.png")
+        else:
+            bgimg = pygame.image.load("Assets/title_screen.png")
+            title_sound.play()
+        for i in range(60):
+            pygame.display.flip(); clock.tick(30)
+            for ev in pygame.event.get():
+                if ev.type == QUIT:
+                    pygame.quit()
+                    sys.exit()
+            screen.fill((0, 0, 0))
+        j = 254
         fadebg = pygame.Surface((sw, sh))
         fadebg.fill((0, 0, 0))
         while j > 0:
@@ -109,16 +124,18 @@ def LoadScreen():
                     pygame.quit()
                     sys.exit()
             screen.fill((255, 255, 255))
+            screen.blit (pygame.transform.scale(bgimg, (sw, sh)), (0, 0))
             fadebg.set_alpha(j)
             screen.blit(fadebg, (0, 0))
-            j -= 8
-        for i in range(40):
+            j -= 2
+        for i in range(80):
             pygame.display.flip(); clock.tick(30)
             for ev in pygame.event.get():
                 if ev.type == QUIT:
                     pygame.quit()
                     sys.exit()
             screen.fill((255, 255, 255))
+            screen.blit (pygame.transform.scale(bgimg, (sw, sh)), (0, 0))
         while j < 248:
             pygame.display.flip(); clock.tick(30)
             for ev in pygame.event.get():
@@ -126,16 +143,19 @@ def LoadScreen():
                     pygame.quit()
                     sys.exit()
             screen.fill((255, 255, 255))
+            screen.blit (pygame.transform.scale(bgimg, (sw, sh)), (0, 0))
             fadebg.set_alpha(j)
             screen.blit(fadebg, (0, 0))
             j += 8
-        for i in range(20):
+        for i in range(60):
             pygame.display.flip(); clock.tick(30)
             for ev in pygame.event.get():
                 if ev.type == QUIT:
                     pygame.quit()
                     sys.exit()
             screen.fill((0, 0, 0))
+    title_sound.fadeout(1200)
+    pygame.mouse.set_visible(True)
 
 class Character:
     def __init__(self):
@@ -1004,7 +1024,7 @@ def menuloop():
                 if ev.key == K_ESCAPE:
                     pass # pause the game
         optcolors = [(100, 100, 0), (100, 100, 0), (100, 100, 0)]
-        optrects = [Rect(400 - 180, 250, 100, 50), Rect(400 - 180, 350, 180, 50), Rect(400 - 180, 450, 100, 50)]
+        optrects = [Rect(400 - 60, 320, 100, 40), Rect(400 - 90, 400, 180, 40), Rect(400 - 55, 480, 100, 40)]
         mouse = [pygame.mouse.get_pos(), pygame.mouse.get_pressed()]
         mouse[0] = mouse[0][0] * 800/sw, mouse[0][1] * 600/sh
         for i in range(len(optrects)):
@@ -1032,10 +1052,11 @@ def menuloop():
             else:
                 optcolors[i] = (100, 100, 0)
         displaysurf.fill((20, 20, 20))
-        writetext((400 - 120, 100), "Bloodlust", txtcolor=(255, 30, 0), fontsize=50)
-        writetext((400 - 180, 250), "> Start", txtcolor=optcolors[0])
-        writetext((400 - 180, 350), "> Settings", txtcolor=optcolors[1])
-        writetext((400 - 180, 450), "> Exit", txtcolor=optcolors[2])
+        displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
+        writetext((400 - 260, 100), "Bloodlust", txtcolor=(255, 30, 0), fontsize=140, fontttf="Assets/AnastasiaScript")
+        writetext((400 - 40, 320), "Start", txtcolor=optcolors[0])
+        writetext((400 - 60, 400), "Settings", txtcolor=optcolors[1])
+        writetext((400 - 35, 480), "Exit", txtcolor=optcolors[2])
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 if __name__ == "__main__":
