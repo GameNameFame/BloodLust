@@ -28,6 +28,7 @@ displayrect = Rect(0, 0, 800, 600)
 wadpic = pygame.image.load("Assets/wad.png")
 title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
 title_bg = pygame.image.load("Assets/title_bg.png")
+text_bg = pygame.image.load("Assets/text_bg.png")
 
 speaking = False
 level = 0
@@ -72,7 +73,8 @@ def speech(index):
                     sys.exit()
             fadebg.set_alpha(j)
             displaysurf.fill((80, 10, 10))
-            writetext((10, 400), text[index], txtcolor=(255, 100, 100))
+            displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
+            writetext((420 - len(text[index]*10), 400), text[index], txtcolor=(0, 255, 100))
             displaysurf.blit(fadebg, (0, 0))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             j -= 20
@@ -82,7 +84,8 @@ def speech(index):
         while speaking:
             pygame.display.flip(); clock.tick(30)
             displaysurf.fill((80, 10, 10))
-            writetext((10, 400), text[index], txtcolor=(255, 100, 100))
+            displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
+            writetext((420 - len(text[index]*10), 400), text[index], txtcolor=(0, 255, 100))
             writetext((260, 560), "[Press SPACE or ENTER to proceed]", fontsize=14, txtcolor=(255, 255, 255))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             for ev in pygame.event.get():
@@ -579,11 +582,17 @@ def combat_scene(enemylist, chunks):
             elif player.xacc > 0:
                 player.xacc -= 1
 
-        playerfacedir = mouse.get_rel()
-        if playerfacedir[0] < 0:
-            player.facedir = "left"
-        elif playerfacedir[0] > 0:
-            player.facedir = "right"
+        if peek_bool:
+            playerfacedir = mouse.get_rel()
+            if playerfacedir[0] < 0:
+                player.facedir = "left"
+            elif playerfacedir[0] > 0:
+                player.facedir = "right"
+        else:
+            if player.direction == "right":
+                player.facedir = "right"
+            else:
+                player.facedir = "left"
 
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
@@ -954,7 +963,7 @@ def level0():
         elif instruct == 2:
             writetext((10, 560), "Press the left shift button while moving left or right to sprint.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 3:
-            writetext((120, 560), "Press the Left Mouse button to unleash your sword's power.", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((10, 560), "Press the Left Mouse button to unleash your sword's power.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 4:
             writetext((120, 560), "Press the Right Mouse button to kick.", txtcolor=(255, 255, 255), fontsize=24)
         elif instruct == 5:
