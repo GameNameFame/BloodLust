@@ -30,7 +30,7 @@ title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
 title_bg = pygame.image.load("Assets/title_bg.png")
 text_bg = pygame.image.load("Assets/text_bg.png")
 
-level = 2
+level = 1
 
 speaking = False
 guibool = True
@@ -284,7 +284,10 @@ class Player(Character):
                         self.magic = False
 
             elif not self.grav == 0:
-                displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (64, 128, self.rect.w, self.rect.h))
+                if player.direction == "right":
+                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (int(self.animationvar)*64, 128*8, self.rect.w, self.rect.h))
+                else:
+                    displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), ((7 - int(self.animationvar))*64, 128*8, self.rect.w, self.rect.h))
             elif self.spritetype == "stand":
                 displaysurf.blit(self.spritesheet, (self.rect.x - scrollx, self.rect.y), (3*64, 0, self.rect.w, self.rect.h))
             elif self.spritetype == "walk":
@@ -328,7 +331,10 @@ class Player(Character):
                     else:
                         self.magic = False
             elif not self.grav == 0:
-                displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (7*64, 128, self.rect.w, self.rect.h))
+                if self.direction == "left":
+                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128*8, self.rect.w, self.rect.h))
+                else:
+                    displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), ((int(self.animationvar)*64), 128*8, self.rect.w, self.rect.h))
             elif self.spritetype == "stand":
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (4*64, 0, self.rect.w, self.rect.h))
             elif self.spritetype == "walk":
