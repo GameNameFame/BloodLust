@@ -54,9 +54,14 @@ def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txt
     txt = font.render(text, True, txtcolor, txtbgcolor)
     displaysurf.blit(txt, position)
 
+def clamp(num, min_value, max_value):
+        num = max(min(num, max_value), min_value)
+        return num
+
 def speech(index):
     global speaking
     speaking = True
+    posx = 0
     with open("Assets/dialogues.txt", 'r') as text:
         text = text.read().split('\n')
     if index + 1 > len(text):
@@ -66,6 +71,8 @@ def speech(index):
         fadebg = pygame.Surface((800, 600))
         fadebg.fill((0, 0, 0))
         while j > 0:
+            posx = 420 - len(text[index]*10)
+            posx = clamp(posx, 0, 600)
             pygame.display.flip(); clock.tick(30)
             for ev in pygame.event.get():
                 if ev.type == QUIT:
@@ -74,7 +81,7 @@ def speech(index):
             fadebg.set_alpha(j)
             displaysurf.fill((80, 10, 10))
             displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
-            writetext((420 - len(text[index]*10), 400), text[index], txtcolor=(0, 255, 100))
+            writetext((posx, 300), text[index], txtcolor=(0, 255, 100))
             displaysurf.blit(fadebg, (0, 0))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             j -= 20
@@ -83,9 +90,11 @@ def speech(index):
             engine.runAndWait()
         while speaking:
             pygame.display.flip(); clock.tick(30)
+            posx = 420 - len(text[index]*10)
+            posx = clamp(posx, 0, 600)
             displaysurf.fill((80, 10, 10))
             displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
-            writetext((420 - len(text[index]*10), 400), text[index], txtcolor=(0, 255, 100))
+            writetext((posx, 300), text[index], txtcolor=(0, 255, 100))
             writetext((260, 560), "[Press SPACE or ENTER to proceed]", fontsize=14, txtcolor=(255, 255, 255))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
             for ev in pygame.event.get():
