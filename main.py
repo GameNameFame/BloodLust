@@ -72,7 +72,7 @@ def speech(index):
         fadebg.fill((0, 0, 0))
         while j > 0:
             posx = 420 - len(text[index]*10)
-            posx = clamp(posx, 0, 600)
+            posx = clamp(posx, 50, 600)
             pygame.display.flip(); clock.tick(30)
             for ev in pygame.event.get():
                 if ev.type == QUIT:
@@ -81,6 +81,7 @@ def speech(index):
             fadebg.set_alpha(j)
             displaysurf.fill((80, 10, 10))
             displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
+            pygame.draw.rect(displaysurf, (0, 0, 0), (0, 280, 800, 80))
             writetext((posx, 300), text[index], txtcolor=(0, 255, 100))
             displaysurf.blit(fadebg, (0, 0))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
@@ -91,9 +92,10 @@ def speech(index):
         while speaking:
             pygame.display.flip(); clock.tick(30)
             posx = 420 - len(text[index]*10)
-            posx = clamp(posx, 0, 600)
+            posx = clamp(posx, 50, 600)
             displaysurf.fill((80, 10, 10))
             displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
+            pygame.draw.rect(displaysurf, (0, 0, 0), (0, 280, 800, 80))
             writetext((posx, 300), text[index], txtcolor=(0, 255, 100))
             writetext((260, 560), "[Press SPACE or ENTER to proceed]", fontsize=14, txtcolor=(255, 255, 255))
             screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
