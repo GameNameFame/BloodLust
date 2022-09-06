@@ -30,8 +30,9 @@ title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
 title_bg = pygame.image.load("Assets/title_bg.png")
 text_bg = pygame.image.load("Assets/text_bg.png")
 
+level = 2
+
 speaking = False
-level = 0
 guibool = True
 narration_bool = True
 peek_bool = True
@@ -446,18 +447,21 @@ def name_input():
     global name
     name = ""
     running = True
+    key_time = 0
     while running:
         pygame.display.flip(); clock.tick(30)
-        displaysurf.fill((180, 100, 10))
-        writetext((30, 300), f"Enter your name: {name}", 38, (0, 0, 0))
+        displaysurf.blit(pygame.transform.scale(text_bg, (800, 600)), (0, 0))
+        pygame.draw.rect(displaysurf, (0, 0, 0), (0, 280, 800, 80))
+        writetext((50, 300), "Enter your name:", 38, (160, 0, 0))
+        writetext((400, 300), str(name), 38, (180, 255, 200))
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         for event in pygame.event.get():
             if event.type == QUIT:
                 pygame.quit()
                 sys.exit()
             if event.type == KEYDOWN:
-                if event.key == K_ESCAPE:
-                    running = False
+                if event.key == K_DELETE:
+                    name = ""
                 if event.key == K_BACKSPACE:
                     name = name[:-1]
                 elif event.key == K_RETURN:
@@ -466,8 +470,15 @@ def name_input():
                     name += "_"
                 elif event.key == K_SPACE:
                     name += " "
-                else:
+                elif len(name) < 16:
                     name += event.unicode
+        keys_pressed = pygame.key.get_pressed()
+        if keys_pressed[K_BACKSPACE] and len(name) > 0:
+            key_time += 0.1
+            if key_time > 3:
+                name = name[:-1]
+        else:
+            key_time = 0
                     
 bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, -3]], [[707, 603], [807, -3]], [[669, 603], [769, -3]], [[667, 603], [767, -3]], [[629, 603], [729, -3]], [[627, 603], [727, -3]], [[589, 603], [689, -3]], [[587, 603], [687, -3]], [[549, 603], [649, -3]], [[547, 603], [647, -3]], [[509, 603], [609, -3]], [[507, 603], [607, -3]], [[469, 603], [569, -3]], [[467, 603], [567, -3]], [[429, 603], [529, -3]], [[427, 603], [527, -3]], [[389, 603], 
 [489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
@@ -1009,7 +1020,7 @@ def level1():
 
 def level2():
     global chunks
-    for i in range(7, 10):
+    for i in range(7, 9):
         speech(i)
     name = name_input()
     chunks = []
@@ -1142,5 +1153,5 @@ def menuloop():
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 if __name__ == "__main__":
-    LoadScreen()
+    # LoadScreen()
     menuloop()
