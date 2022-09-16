@@ -17,11 +17,13 @@ pygame.init()
 
 clock = pygame.time.Clock()
 sw, sh = pygame.display.Info().current_w, pygame.display.Info().current_h
+monitors = pygame.display.get_num_displays()
+main_monitor = 0
 
 pygame.display.set_caption("Bloodlust : Rise of the greatest assassin")
 pygame.display.set_icon(pygame.image.load("Assets/logo.png"))
 
-screen = pygame.display.set_mode((sw, sh), FULLSCREEN)
+screen = pygame.display.set_mode((sw, sh), FULLSCREEN, display=main_monitor)
 displaysurf = pygame.Surface((800, 600))
 displayrect = Rect(0, 0, 800, 600)
 
@@ -30,7 +32,7 @@ title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
 title_bg = pygame.image.load("Assets/title_bg.png")
 text_bg = pygame.image.load("Assets/text_bg.png")
 
-level = 1
+level = 0
 
 speaking = False
 guibool = True
@@ -49,7 +51,7 @@ class Particle:
         self.position[0] += self.direction[0]
         self.position[1] += self.direction[1]
 
-def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='freesansbold'):
+def writetext(position, text="Sample Text", fontsize=30, txtcolor=(0, 0, 0), txtbgcolor=None, fontttf='Assets/GothamMedium'):
     fontttf += '.ttf'
     font = pygame.font.Font(fontttf, fontsize)
     txt = font.render(text, True, txtcolor, txtbgcolor)
@@ -1056,13 +1058,15 @@ def screen_fade():
 
 def settingsloop():
     running = True
-    global narration_bool, peek_bool
+    global narration_bool, peek_bool, main_monitor, sw, sh, screen
     rect1color = (0, 255, 100)
     rect2color = (0, 255, 100)
     rect1 = Rect(400, 200, 120, 40)
     rect2 = Rect(400, 300, 120, 40)
+    rect3 = Rect(400, 400, 120, 40)
+    # monitors = pygame.display.get_num_displays()
+    # print(monitors)
     while running:
-        pygame.display.flip(); clock.tick(30)
         if narration_bool:
             rect1color = (0, 255, 100)
         else:
@@ -1085,9 +1089,22 @@ def settingsloop():
                         narration_bool = not narration_bool
                     if rect2.collidepoint((mouse_pos[0]/sw*800, mouse_pos[1]/sh*600)):
                         peek_bool = not peek_bool
+                    if rect3.collidepoint((mouse_pos[0]/sw*800, mouse_pos[1]/sh*600)):
+                        if main_monitor < monitors - 1:
+                            main_monitor += 1
+                        else:
+                            main_monitor = 0
+                        screen = pygame.display.set_mode((sw, sh), FULLSCREEN, display=main_monitor)
+                        sw, sh = screen.get_size()
+                        print(main_monitor)
+        pygame.display.flip(); clock.tick(30)
         displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
         writetext((120, 200), "Narration: " + str(narration_bool), txtcolor=(255, 255, 255), fontsize=24)
         writetext((120, 300), "Peek: " + str(peek_bool), txtcolor=(255, 255, 255), fontsize=24)
+        monitors = pygame.display.get_num_displays()
+        if monitors > 0:
+            writetext((120, 400), "Display: ", txtcolor=(255, 255, 255), fontsize=24)
+            writetext((400, 400), str(main_monitor+1), txtcolor=(255, 255, 255), fontsize=24)
         pygame.draw.rect(displaysurf, rect1color, rect1)
         pygame.draw.rect(displaysurf, rect2color, rect2)
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
@@ -1096,7 +1113,7 @@ def menuloop():
     running = True
     global level
     j = 254
-    fadebg = pygame.Surface((sw, sh))
+    fadebg = pygame.Surface((1920, 1080))
     fadebg.fill((0, 0, 0))
     optcolors = [(100, 100, 0), (100, 100, 0), (100, 100, 0)]
     while j > 0:
@@ -1159,5 +1176,5 @@ def menuloop():
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 if __name__ == "__main__":
-    # LoadScreen()
+    LoadScreen()
     menuloop()
