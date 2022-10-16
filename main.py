@@ -32,7 +32,7 @@ title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
 title_bg = pygame.image.load("Assets/title_bg.png")
 text_bg = pygame.image.load("Assets/text_bg.png")
 
-level = 0
+level = 1
 
 speaking = False
 guibool = True
@@ -400,6 +400,19 @@ class Enemy(Character):
             elif self.spritetype == "run":
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
 
+class NavWheel:
+    def __init__(self):
+        self.no_options = 2
+        self.selected = 0
+        self.color_main = (20, 100, 120)
+        self.color_sec = (40, 200, 240)
+        self.coords = (400, 300)
+        self.active = False
+    
+    def display(self):
+        pygame.draw.circle(displaysurf, self.color_main, self.coords, 240)
+
+navwheel = NavWheel()
 player = Player()
 enemylist = []
 
@@ -611,6 +624,12 @@ def combat_scene(enemylist, chunks):
                 player.xacc += 1
             elif player.xacc > 0:
                 player.xacc -= 1
+        
+        mouse_btn = pygame.mouse.get_pressed()
+        if mouse_btn[1]:
+            navwheel.active = True
+        else:
+            navwheel.active = False
 
         if peek_bool:
             playerfacedir = mouse.get_rel()
@@ -791,6 +810,8 @@ def combat_scene(enemylist, chunks):
                     pygame.draw.polygon(displaysurf, (255, 180, 0), ((760, 280), (760, 320), (780, 300)))
                 elif enemy.rect.right < displayrect.x:
                     pygame.draw.polygon(displaysurf, (255, 180, 0), ((40, 280), (40, 320), (20, 300)))
+        if navwheel.active:
+            navwheel.display()
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         if len(enemylist) == 0:
             running = False
