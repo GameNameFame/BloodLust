@@ -253,6 +253,7 @@ class Player(Character):
         self.hitpoints = 100
         self.attackpower = 10
         self.hpcolor = [0, 255, 0]
+        self.armed = True
     def display(self, scrollx):
         if self.facedir == "right":
             if self.attack:
@@ -369,6 +370,7 @@ class Enemy(Character):
         self.hpcolor = [0, 255, 0]
         self.attackpower = 2
         self.selfcollide = False
+        self.armed = True
     def display(self, scrollx):
         if self.direction == "right":
             if self.attack:
@@ -565,6 +567,8 @@ def combat_scene(enemylist, chunks):
                 enemy.grav = 0
                 enemy.rect.bottom = 440
 
+        mouse_btn = pygame.mouse.get_pressed()
+
         for ev in pygame.event.get():
             if ev.type == QUIT:
                 running = False
@@ -583,22 +587,26 @@ def combat_scene(enemylist, chunks):
                 if ev.key == K_z:
                     print(scrollx)
             if ev.type == MOUSEBUTTONDOWN:
-                if ev.button == 1:
-                    player.attack = True 
-                    player.attackno = 2*128
-                    player.animationvar = 0
-                if ev.button == 3:
-                    player.kick = True
-                    player.attackno = 4*128
-                    player.animationvar = 0
-                if ev.button == 4:
+                if not mouse_btn[0] and not mouse_btn[2]:
+                    if ev.button == 1 and player.armed:
+                        player.attack = True 
+                        player.attackno = 2*128
+                        player.animationvar = 0
+                    elif ev.button == 3:
+                        player.kick = True
+                        player.attackno = 4*128
+                        player.animationvar = 0
+                elif ev.button == 4:
                     player.magic = True
                     player.attackno = 6*128
                     player.animationvar = 0
-                if ev.button == 5:
+                elif ev.button == 5:
                     player.throw = True
                     player.attackno = 5*128
                     player.animationvar = 0
+                else:
+                    player.attack = False
+                    player.kick = False
                 
         if keys_pressed[K_a]:
             if player.rect.x > llimit and not player.throw and not player.magic:
@@ -625,14 +633,13 @@ def combat_scene(enemylist, chunks):
             elif player.xacc > 0:
                 player.xacc -= 1
         
-        mouse_btn = pygame.mouse.get_pressed()
-        if mouse_btn[1]:
+        if mouse_btn[0] and mouse_btn[2]:
             navwheel.active = True
         else:
             navwheel.active = False
 
+        playerfacedir = mouse.get_rel()
         if peek_bool:
-            playerfacedir = mouse.get_rel()
             if playerfacedir[0] < 0:
                 player.facedir = "left"
             elif playerfacedir[0] > 0:
@@ -642,6 +649,11 @@ def combat_scene(enemylist, chunks):
                 player.facedir = "right"
             else:
                 player.facedir = "left"
+        if navwheel.active:
+            if playerfacedir[0] < 0:
+                player.armed = True
+            elif playerfacedir[0] > 0:
+                player.armed = False
 
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
