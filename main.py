@@ -17,13 +17,11 @@ pygame.init()
 
 clock = pygame.time.Clock()
 sw, sh = pygame.display.Info().current_w, pygame.display.Info().current_h
-monitors = pygame.display.get_num_displays()
-main_monitor = 0
 
 pygame.display.set_caption("Bloodlust : Rise of the greatest assassin")
 pygame.display.set_icon(pygame.image.load("Assets/logo.png"))
 
-screen = pygame.display.set_mode((sw, sh), FULLSCREEN, display=main_monitor)
+screen = pygame.display.set_mode((sw, sh), FULLSCREEN)
 displaysurf = pygame.Surface((800, 600))
 displayrect = Rect(0, 0, 800, 600)
 
@@ -32,7 +30,7 @@ title_sound = mixer.Sound("Assets/low-thunder-sound.mp3")
 title_bg = pygame.image.load("Assets/title_bg.png")
 text_bg = pygame.image.load("Assets/text_bg.png")
 
-level = 1
+level = 0
 
 speaking = False
 guibool = True
@@ -253,7 +251,6 @@ class Player(Character):
         self.hitpoints = 100
         self.attackpower = 10
         self.hpcolor = [0, 255, 0]
-        self.armed = True
     def display(self, scrollx):
         if self.facedir == "right":
             if self.attack:
@@ -370,7 +367,6 @@ class Enemy(Character):
         self.hpcolor = [0, 255, 0]
         self.attackpower = 2
         self.selfcollide = False
-        self.armed = True
     def display(self, scrollx):
         if self.direction == "right":
             if self.attack:
@@ -402,19 +398,6 @@ class Enemy(Character):
             elif self.spritetype == "run":
                 displaysurf.blit(pygame.transform.flip(self.spritesheet, 1, 0), (self.rect.x - scrollx, self.rect.y), (((int(self.animationvar) - 7) * -1)*64, 128, self.rect.w, self.rect.h))
 
-class NavWheel:
-    def __init__(self):
-        self.no_options = 2
-        self.selected = 0
-        self.color_main = (20, 100, 120)
-        self.color_sec = (40, 200, 240)
-        self.coords = (400, 300)
-        self.active = False
-    
-    def display(self):
-        pygame.draw.circle(displaysurf, self.color_main, self.coords, 240)
-
-navwheel = NavWheel()
 player = Player()
 enemylist = []
 
@@ -506,7 +489,217 @@ def name_input():
 bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, -3]], [[707, 603], [807, -3]], [[669, 603], [769, -3]], [[667, 603], [767, -3]], [[629, 603], [729, -3]], [[627, 603], [727, -3]], [[589, 603], [689, -3]], [[587, 603], [687, -3]], [[549, 603], [649, -3]], [[547, 603], [647, -3]], [[509, 603], [609, -3]], [[507, 603], [607, -3]], [[469, 603], [569, -3]], [[467, 603], [567, -3]], [[429, 603], [529, -3]], [[427, 603], [527, -3]], [[389, 603], 
 [489, -3]], [[387, 603], [487, -3]], [[349, 603], [449, -3]], [[347, 603], [447, -3]], [[309, 603], [409, -3]], [[307, 603], [407, -3]], [[269, 603], [369, -3]], [[267, 603], [367, -3]], [[229, 603], [329, -3]], [[227, 603], [327, -3]], [[189, 603], [289, -3]], [[187, 603], [287, -3]], [[149, 603], [249, -3]], [[147, 603], [247, -3]], [[109, 603], [209, -3]], [[107, 603], [207, -3]], [[69, 603], [169, -3]], [[67, 603], [167, -3]], [[29, 603], [129, -3]], [[27, 603], [127, -3]], [[-11, 603], [89, -3]], [[-13, 603], [87, -3]], [[-51, 603], [49, -3]], [[-53, 603], [47, -3]], [[-91, 603], [9, -3]], [[-93, 603], [7, -3]]]
 
-def combat_scene(enemylist, chunks):
+def combat_scene(enemy):
+    global chunks
+    enemy = Enemy(0)
+    chunks = []
+    createGrassChunk(0)
+    running = True
+    instruct = 0
+    countdown = -1
+    scrollx = 0
+    while running:
+        player.facedir = player.direction
+        # mouse_pressed = pygame.mouse.get_pressed()
+        keys_pressed = pygame.key.get_pressed()
+        player.animationvar += 0.4
+        if player.animationvar > 8:
+            player.animationvar = 0
+        enemy.animationvar += 0.4
+        if enemy.animationvar > 8:
+            enemy.animationvar = 0
+
+        pygame.display.flip(); clock.tick(30)
+        if countdown > 0:
+            countdown -= 1
+        if player.rect.bottom < 440:
+            player.grav += 1
+        else:
+            player.grav = 0
+            player.rect.bottom = 440
+        if enemy.rect.bottom < 440:
+            enemy.grav += 1
+        else:
+            enemy.grav = 0
+            enemy.rect.bottom = 440
+        if player.attack:
+            for enemy in enemylist:
+                if player.rect.colliderect(enemy.rect):
+                    if player.facedir == "right":
+                        if enemy.rect.x > player.rect.x:
+                            enemy.hitpoints -= player.attackpower
+                        enemy.rect.x += 60
+                    else:
+                        if enemy.rect.right < player.rect.right:
+                            enemy.hitpoints -= player.attackpower
+                        enemy.rect.x -= 60
+        if player.kick:
+            for enemy in enemylist:
+                if player.rect.colliderect(enemy.rect):
+                    if player.facedir == "right":
+                        if enemy.rect.x > player.rect.x:
+                            enemy.hitpoints -= player.attackpower/2
+                            enemy.grav = -3
+                        enemy.rect.x += 120
+                    else:
+                        if enemy.rect.right < player.rect.right:
+                            enemy.hitpoints -= player.attackpower/2
+                            enemy.grav = -3
+                        enemy.rect.x -= 120
+        for ev in pygame.event.get():
+            if ev.type == QUIT:
+                running = False
+                pygame.quit()
+                sys.exit()
+            if ev.type == MOUSEBUTTONDOWN:
+                if ev.button == 1:
+                    player.attack = True 
+                    player.animationvar = 0
+                    player.attackno = 2*128
+                if ev.button == 3:
+                    player.kick = True
+                    player.attackno = 4*128
+                    player.animationvar = 0
+                if ev.button == 4:
+                    player.magic = True
+                    player.attackno = 6*128
+                    player.animationvar = 0
+                    countdown = 300
+                if ev.button == 5:
+                    player.throw = True
+                    player.attackno = 5*128
+                    player.animationvar = 0
+            if ev.type == KEYDOWN:
+                if ev.key == K_ESCAPE:
+                    # pause the game
+                    running = False
+                if ev.key == K_w:
+                    if player.rect.bottom == 440 and instruct > 0:
+                        player.grav = -18
+                if ev.key == K_x:
+                    print(player.rect.x)
+                if ev.key == K_z:
+                    print(scrollx)
+        if keys_pressed[K_a]:
+            player.direction = "left"
+            if player.rect.x > 2:
+                player.spritetype = "walk"
+                if player.xacc > -10:
+                    player.xacc -= 1
+            else:
+                player.rect.x = 0
+                player.xacc = 0
+                player.spritetype = "stand"
+        elif keys_pressed[K_d]:
+            player.direction = "right"
+            if player.rect.right < 798:
+                player.spritetype = "walk"
+                if player.xacc < 10:
+                    player.xacc += 1
+            else:
+                player.rect.x = 736
+                player.xacc = 0
+                player.spritetype = "stand"
+        else:
+            player.spritetype = "stand"
+            if player.xacc < 0:
+                player.xacc += 1
+            elif player.xacc > 0:
+                player.xacc -= 1
+        if not keys_pressed[K_LSHIFT]:
+            player.rect.x += player.xacc/2
+        elif player.spritetype == "walk":
+            if instruct > 1:
+                player.spritetype = "run"
+                player.rect.x += player.xacc
+            else:
+                player.rect.x += player.xacc/2
+        player.rect.y += player.grav
+        enemy.rect.y += enemy.grav
+        if enemy.rect.colliderect(displayrect):
+            if player.rect.right < enemy.rect.left:
+                enemy.direction = "left"
+            elif player.rect.left > enemy.rect.right:
+                enemy.direction = "right"
+        else:
+            enemy.spritetype = "stand"
+
+        if enemy.rect.colliderect(displayrect):
+                if enemy.direction == "left":
+                    if enemy.grav == 0:
+                        if enemy.rect.x - player.rect.right < 80:
+                            enemy.spritetype = "run"
+                        else:
+                            enemy.spritetype = "walk"
+                    if enemy.spritetype != "stand":
+                        if enemy.xacc > -enemy.speed:
+                            enemy.xacc -= 1
+                    else:
+                        if enemy.xacc < 0:
+                            enemy.xacc += 1
+                elif enemy.direction == "right":
+                    if enemy.grav == 0:
+                        if player.rect.x - enemy.rect.right < 80:
+                            enemy.spritetype = "run"
+                        else:
+                            enemy.spritetype = "walk"
+                    if enemy.spritetype != "stand":
+                        if enemy.xacc < enemy.speed:
+                            enemy.xacc += 1
+                    else:
+                        if enemy.xacc > 0:
+                            enemy.xacc -= 1
+
+                if enemy.rect.colliderect(player.rect):
+                    if not enemy.attack:
+                        if enemy.direction == "left" and player.rect.x > enemy.rect.centerx:
+                            enemy.direction = "right"
+                        elif enemy.direction == "right" and player.rect.right < enemy.rect.centerx:
+                            enemy.direction = "left"
+                        else:
+                            enemy.animationvar = 0
+                            player.hitpoints -= enemy.attackpower
+                            if enemy.direction == "right":
+                                if player.rect.x < sw:
+                                    player.rect.x += 30
+                                    player.grav = -3
+                            else:
+                                if player.rect.x > 0:
+                                    player.rect.x -= 30
+                                    player.grav = -3
+                    enemy.attack = True
+                else:
+                    if enemy.spritetype == "run":
+                        enemy.rect.x += enemy.xacc
+                    elif enemy.spritetype == "walk":
+                        enemy.rect.x += enemy.xacc/2
+                if enemy.rect.colliderect(shuriken.rect):
+                    if shuriken.speed > 0:
+                        enemy.rect.x += 50
+                    elif shuriken.speed < 0:
+                        enemy.rect.x -= 50
+                    shuriken.speed = 0; shuriken.dist = 0
+                    shuriken.rect.x = shuriken.rect.y = -30
+                    enemy.hitpoints -= shuriken.damage
+                if enemy.rect.colliderect(fireball.rect):
+                    if fireball.speed > 0:
+                        enemy.rect.x += 100
+                    elif fireball.speed < 0:
+                        enemy.rect.x -= 100
+                    fireball.speed = 0; fireball.dist = 0
+                    fireball.rect.x = fireball.rect.y = -30
+                    enemy.hitpoints -= fireball.damage
+
+        # display
+        displaysurf.fill((255, 60, 0))
+        pygame.draw.rect(displaysurf, (0, 0, 0), (0, 600 - 160, 800, 160))
+        pygame.draw.polygon(displaysurf, (255, 220, 20), ((player.rect.x + 20 - scrollx, 500), (player.rect.right - 20 - scrollx, 500), (player.rect.centerx - scrollx, 480)))
+        player.display(scrollx)
+        enemy.display(scrollx)
+        displaysurf.blit(chunks[0][1], (chunks[0][0].x, 0))
+        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+
+def level_map(enemylist, chunks):
     global level
     if level == 1:
         llimit = -2442
@@ -515,7 +708,7 @@ def combat_scene(enemylist, chunks):
         llimit = -4842
         rlimit = 5566
     player.rect.x = 0
-    player.hitpoint = 100
+    player.hitpoints = 100
     player.direction = "right"
     running = True
     scrollx = 0
@@ -567,8 +760,6 @@ def combat_scene(enemylist, chunks):
                 enemy.grav = 0
                 enemy.rect.bottom = 440
 
-        mouse_btn = pygame.mouse.get_pressed()
-
         for ev in pygame.event.get():
             if ev.type == QUIT:
                 running = False
@@ -587,26 +778,22 @@ def combat_scene(enemylist, chunks):
                 if ev.key == K_z:
                     print(scrollx)
             if ev.type == MOUSEBUTTONDOWN:
-                if not mouse_btn[0] and not mouse_btn[2]:
-                    if ev.button == 1 and player.armed:
-                        player.attack = True 
-                        player.attackno = 2*128
-                        player.animationvar = 0
-                    elif ev.button == 3:
-                        player.kick = True
-                        player.attackno = 4*128
-                        player.animationvar = 0
-                elif ev.button == 4:
+                if ev.button == 1:
+                    player.attack = True 
+                    player.attackno = 2*128
+                    player.animationvar = 0
+                if ev.button == 3:
+                    player.kick = True
+                    player.attackno = 4*128
+                    player.animationvar = 0
+                if ev.button == 4:
                     player.magic = True
                     player.attackno = 6*128
                     player.animationvar = 0
-                elif ev.button == 5:
+                if ev.button == 5:
                     player.throw = True
                     player.attackno = 5*128
                     player.animationvar = 0
-                else:
-                    player.attack = False
-                    player.kick = False
                 
         if keys_pressed[K_a]:
             if player.rect.x > llimit and not player.throw and not player.magic:
@@ -632,14 +819,9 @@ def combat_scene(enemylist, chunks):
                 player.xacc += 1
             elif player.xacc > 0:
                 player.xacc -= 1
-        
-        if mouse_btn[0] and mouse_btn[2]:
-            navwheel.active = True
-        else:
-            navwheel.active = False
 
-        playerfacedir = mouse.get_rel()
         if peek_bool:
+            playerfacedir = mouse.get_rel()
             if playerfacedir[0] < 0:
                 player.facedir = "left"
             elif playerfacedir[0] > 0:
@@ -649,11 +831,6 @@ def combat_scene(enemylist, chunks):
                 player.facedir = "right"
             else:
                 player.facedir = "left"
-        if navwheel.active:
-            if playerfacedir[0] < 0:
-                player.armed = True
-            elif playerfacedir[0] > 0:
-                player.armed = False
 
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
@@ -822,8 +999,6 @@ def combat_scene(enemylist, chunks):
                     pygame.draw.polygon(displaysurf, (255, 180, 0), ((760, 280), (760, 320), (780, 300)))
                 elif enemy.rect.right < displayrect.x:
                     pygame.draw.polygon(displaysurf, (255, 180, 0), ((40, 280), (40, 320), (20, 300)))
-        if navwheel.active:
-            navwheel.display()
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
         if len(enemylist) == 0:
             running = False
@@ -1057,7 +1232,7 @@ def level1():
             createChunk(i)
     for i in range(3):
         enemylist.append(Enemy(rd(-3000, 3000)))
-    combat_scene(enemylist, chunks)
+    level_map(enemylist, chunks)
 
 def level2():
     global chunks
@@ -1072,7 +1247,7 @@ def level2():
             createChunk(i)
     for i in range(8):
         enemylist.append(Enemy(rd(-5200, 5200)))
-    combat_scene(enemylist, chunks)
+    level_map(enemylist, chunks)
 
 def screen_fade():
     j = 0
@@ -1091,15 +1266,13 @@ def screen_fade():
 
 def settingsloop():
     running = True
-    global narration_bool, peek_bool, main_monitor, sw, sh, screen
+    global narration_bool, peek_bool
     rect1color = (0, 255, 100)
     rect2color = (0, 255, 100)
     rect1 = Rect(400, 200, 120, 40)
     rect2 = Rect(400, 300, 120, 40)
-    rect3 = Rect(400, 400, 120, 40)
-    # monitors = pygame.display.get_num_displays()
-    # print(monitors)
     while running:
+        pygame.display.flip(); clock.tick(30)
         if narration_bool:
             rect1color = (0, 255, 100)
         else:
@@ -1122,22 +1295,9 @@ def settingsloop():
                         narration_bool = not narration_bool
                     if rect2.collidepoint((mouse_pos[0]/sw*800, mouse_pos[1]/sh*600)):
                         peek_bool = not peek_bool
-                    if rect3.collidepoint((mouse_pos[0]/sw*800, mouse_pos[1]/sh*600)):
-                        if main_monitor < monitors - 1:
-                            main_monitor += 1
-                        else:
-                            main_monitor = 0
-                        screen = pygame.display.set_mode((sw, sh), FULLSCREEN, display=main_monitor)
-                        sw, sh = screen.get_size()
-                        print(main_monitor)
-        pygame.display.flip(); clock.tick(30)
         displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
         writetext((120, 200), "Narration: " + str(narration_bool), txtcolor=(255, 255, 255), fontsize=24)
         writetext((120, 300), "Peek: " + str(peek_bool), txtcolor=(255, 255, 255), fontsize=24)
-        monitors = pygame.display.get_num_displays()
-        if monitors > 0:
-            writetext((120, 400), "Display: ", txtcolor=(255, 255, 255), fontsize=24)
-            writetext((400, 400), str(main_monitor+1), txtcolor=(255, 255, 255), fontsize=24)
         pygame.draw.rect(displaysurf, rect1color, rect1)
         pygame.draw.rect(displaysurf, rect2color, rect2)
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
@@ -1146,7 +1306,7 @@ def menuloop():
     running = True
     global level
     j = 254
-    fadebg = pygame.Surface((1920, 1080))
+    fadebg = pygame.Surface((sw, sh))
     fadebg.fill((0, 0, 0))
     optcolors = [(100, 100, 0), (100, 100, 0), (100, 100, 0)]
     while j > 0:
@@ -1182,16 +1342,17 @@ def menuloop():
                 optcolors[i] = (200, 200, 0)
                 if mouse[1][0]:
                     if i == 0:
-                        if level == 0:
-                            screen_fade()
-                            level0()
-                        if level == 1:
-                            screen_fade()
-                            level1()
-                        if level == 2:
-                            screen_fade()
-                            level2()
-                            level = 0
+                        combat_scene(Enemy(3/4*sw))
+                        # if level == 0:
+                        #     screen_fade()
+                        #     level0()
+                        # if level == 1:
+                        #     screen_fade()
+                        #     level1()
+                        # if level == 2:
+                        #     screen_fade()
+                        #     level2()
+                        #     level = 0
                     elif i == 1:
                         settingsloop()
                     elif i == 2:
@@ -1209,5 +1370,5 @@ def menuloop():
         screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
 
 if __name__ == "__main__":
-    LoadScreen()
+    # LoadScreen()
     menuloop()
