@@ -491,7 +491,7 @@ bglines = [[[749, 603], [849, -3]], [[747, 603], [847, -3]], [[709, 603], [809, 
 
 def combat_scene(enemy):
     global chunks
-    enemy = Enemy(0)
+    enemy = Enemy(600)
     chunks = []
     createGrassChunk(0)
     running = True
