@@ -495,8 +495,6 @@ def combat_scene(enemy):
     chunks = []
     createGrassChunk(0)
     running = True
-    instruct = 0
-    countdown = -1
     scrollx = 0
     while running:
         player.facedir = player.direction
@@ -510,8 +508,6 @@ def combat_scene(enemy):
             enemy.animationvar = 0
 
         pygame.display.flip(); clock.tick(30)
-        if countdown > 0:
-            countdown -= 1
         if player.rect.bottom < 440:
             player.grav += 1
         else:
@@ -522,30 +518,16 @@ def combat_scene(enemy):
         else:
             enemy.grav = 0
             enemy.rect.bottom = 440
-        if player.attack:
-            for enemy in enemylist:
-                if player.rect.colliderect(enemy.rect):
-                    if player.facedir == "right":
-                        if enemy.rect.x > player.rect.x:
-                            enemy.hitpoints -= player.attackpower
-                        enemy.rect.x += 60
-                    else:
-                        if enemy.rect.right < player.rect.right:
-                            enemy.hitpoints -= player.attackpower
-                        enemy.rect.x -= 60
-        if player.kick:
-            for enemy in enemylist:
-                if player.rect.colliderect(enemy.rect):
-                    if player.facedir == "right":
-                        if enemy.rect.x > player.rect.x:
-                            enemy.hitpoints -= player.attackpower/2
-                            enemy.grav = -3
-                        enemy.rect.x += 120
-                    else:
-                        if enemy.rect.right < player.rect.right:
-                            enemy.hitpoints -= player.attackpower/2
-                            enemy.grav = -3
-                        enemy.rect.x -= 120
+
+        if enemy.rect.right > 800:
+            enemy.rect.right = 600
+        if enemy.rect.x < 0:
+            enemy.rect.x = 200
+        if player.rect.right > 800:
+            player.rect.right = 800
+        if player.rect.x < 0:
+            player.rect.x = 0
+
         for ev in pygame.event.get():
             if ev.type == QUIT:
                 running = False
@@ -564,7 +546,6 @@ def combat_scene(enemy):
                     player.magic = True
                     player.attackno = 6*128
                     player.animationvar = 0
-                    countdown = 300
                 if ev.button == 5:
                     player.throw = True
                     player.attackno = 5*128
@@ -574,12 +555,44 @@ def combat_scene(enemy):
                     # pause the game
                     running = False
                 if ev.key == K_w:
-                    if player.rect.bottom == 440 and instruct > 0:
+                    if player.rect.bottom == 440:
                         player.grav = -18
                 if ev.key == K_x:
                     print(player.rect.x)
                 if ev.key == K_z:
                     print(scrollx)
+        if player.attack:
+            if player.rect.colliderect(enemy.rect):
+                if player.facedir == "right" and enemy.direction == "left":
+                    if enemy.rect.x > player.rect.x:
+                        enemy.hitpoints -= player.attackpower
+                        enemy.grav = -6
+                        enemy.rect.y -= 10
+                    enemy.rect.x += 80
+                    enemy.xacc = 6
+                elif player.facedir == "left" and enemy.direction == "right":
+                    if enemy.rect.right < player.rect.right:
+                        enemy.hitpoints -= player.attackpower
+                        enemy.grav = -6
+                        enemy.rect.y -= 10
+                    enemy.rect.x -= 80
+                    enemy.xacc = -6
+        if player.kick:
+            if player.rect.colliderect(enemy.rect):
+                if player.facedir == "right" and enemy.direction == "left":
+                    if enemy.rect.x > player.rect.x:
+                        enemy.hitpoints -= player.attackpower/2
+                        enemy.grav = -6
+                        enemy.rect.y -= 10
+                    enemy.rect.x += 80
+                    enemy.xacc = -6
+                elif player.facedir == "left" and enemy.direction == "right":
+                    if enemy.rect.right < player.rect.right:
+                        enemy.hitpoints -= player.attackpower/2
+                        enemy.grav = -8
+                        enemy.rect.y -= 10
+                    enemy.rect.x -= 80
+                    enemy.xacc = -6
         if keys_pressed[K_a]:
             player.direction = "left"
             if player.rect.x > 2:
@@ -609,11 +622,9 @@ def combat_scene(enemy):
         if not keys_pressed[K_LSHIFT]:
             player.rect.x += player.xacc/2
         elif player.spritetype == "walk":
-            if instruct > 1:
-                player.spritetype = "run"
-                player.rect.x += player.xacc
-            else:
-                player.rect.x += player.xacc/2
+            player.spritetype = "run"
+            player.rect.x += player.xacc
+
         player.rect.y += player.grav
         enemy.rect.y += enemy.grav
         if enemy.rect.colliderect(displayrect):
@@ -625,30 +636,31 @@ def combat_scene(enemy):
             enemy.spritetype = "stand"
 
         if enemy.rect.colliderect(displayrect):
-                if enemy.direction == "left":
-                    if enemy.grav == 0:
-                        if enemy.rect.x - player.rect.right < 80:
-                            enemy.spritetype = "run"
+                if enemy.grav == 0:
+                    if enemy.direction == "left":
+                        if enemy.grav == 0:
+                            if enemy.rect.x - player.rect.right < 80:
+                                enemy.spritetype = "run"
+                            else:
+                                enemy.spritetype = "walk"
+                        if enemy.spritetype != "stand":
+                            if enemy.xacc > -enemy.speed:
+                                enemy.xacc -= 1
                         else:
-                            enemy.spritetype = "walk"
-                    if enemy.spritetype != "stand":
-                        if enemy.xacc > -enemy.speed:
-                            enemy.xacc -= 1
-                    else:
-                        if enemy.xacc < 0:
-                            enemy.xacc += 1
-                elif enemy.direction == "right":
-                    if enemy.grav == 0:
-                        if player.rect.x - enemy.rect.right < 80:
-                            enemy.spritetype = "run"
+                            if enemy.xacc < 0:
+                                enemy.xacc += 1
+                    elif enemy.direction == "right":
+                        if enemy.grav == 0:
+                            if player.rect.x - enemy.rect.right < 80:
+                                enemy.spritetype = "run"
+                            else:
+                                enemy.spritetype = "walk"
+                        if enemy.spritetype != "stand":
+                            if enemy.xacc < enemy.speed:
+                                enemy.xacc += 1
                         else:
-                            enemy.spritetype = "walk"
-                    if enemy.spritetype != "stand":
-                        if enemy.xacc < enemy.speed:
-                            enemy.xacc += 1
-                    else:
-                        if enemy.xacc > 0:
-                            enemy.xacc -= 1
+                            if enemy.xacc > 0:
+                                enemy.xacc -= 1
 
                 if enemy.rect.colliderect(player.rect):
                     if not enemy.attack:
@@ -689,6 +701,11 @@ def combat_scene(enemy):
                     fireball.speed = 0; fireball.dist = 0
                     fireball.rect.x = fireball.rect.y = -30
                     enemy.hitpoints -= fireball.damage
+
+        if player.attack or player.kick:
+            player.xacc = 0
+        if enemy.attack:
+            enemy.xacc = 0
 
         # display
         displaysurf.fill((255, 60, 0))
@@ -1309,21 +1326,21 @@ def menuloop():
     fadebg = pygame.Surface((sw, sh))
     fadebg.fill((0, 0, 0))
     optcolors = [(100, 100, 0), (100, 100, 0), (100, 100, 0)]
-    while j > 0:
-        pygame.display.flip(); clock.tick(30)
-        for ev in pygame.event.get():
-            if ev.type == QUIT:
-                pygame.quit()
-                sys.exit()
-        displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
-        writetext((400 - 260, 100), "Bloodlust", txtcolor=(255, 30, 0), fontsize=140, fontttf="Assets/AnastasiaScript")
-        writetext((400 - 40, 320), "Start", txtcolor=optcolors[0])
-        writetext((400 - 60, 400), "Settings", txtcolor=optcolors[1])
-        writetext((400 - 35, 480), "Exit", txtcolor=optcolors[2])
-        screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
-        fadebg.set_alpha(j)
-        screen.blit(fadebg, (0, 0))
-        j -= 2
+    # while j > 0:
+    #     pygame.display.flip(); clock.tick(30)
+    #     for ev in pygame.event.get():
+    #         if ev.type == QUIT:
+    #             pygame.quit()
+    #             sys.exit()
+    #     displaysurf.blit(pygame.transform.scale(title_bg, (sw, sh)), (0, 0))
+    #     writetext((400 - 260, 100), "Bloodlust", txtcolor=(255, 30, 0), fontsize=140, fontttf="Assets/AnastasiaScript")
+    #     writetext((400 - 40, 320), "Start", txtcolor=optcolors[0])
+    #     writetext((400 - 60, 400), "Settings", txtcolor=optcolors[1])
+    #     writetext((400 - 35, 480), "Exit", txtcolor=optcolors[2])
+    #     screen.blit(pygame.transform.scale(displaysurf, (sw, sh)), (0, 0))
+    #     fadebg.set_alpha(j)
+    #     screen.blit(fadebg, (0, 0))
+    #     j -= 2
     while running:
         pygame.display.flip(); clock.tick(30)
         for ev in pygame.event.get():
@@ -1342,7 +1359,6 @@ def menuloop():
                 optcolors[i] = (200, 200, 0)
                 if mouse[1][0]:
                     if i == 0:
-                        combat_scene(Enemy(3/4*sw))
                         # if level == 0:
                         #     screen_fade()
                         #     level0()
@@ -1353,6 +1369,7 @@ def menuloop():
                         #     screen_fade()
                         #     level2()
                         #     level = 0
+                        combat_scene(Enemy(3/4*sw))
                     elif i == 1:
                         settingsloop()
                     elif i == 2:
